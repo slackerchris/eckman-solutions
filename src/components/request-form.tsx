@@ -40,6 +40,7 @@ const CATEGORIES = [
   { value: "New website",       label: "New website" },
   { value: "New web app",       label: "New web app" },
   { value: "Custom software",   label: "Custom software" },
+  { value: "Data analytics",    label: "Data analytics" },
   { value: "Hardware / IT",     label: "Hardware & IT support" },
   { value: "Support request",   label: "Support / update (existing project)" },
   { value: "Other",             label: "Other" },
@@ -129,6 +130,7 @@ export function RequestForm({
             category === "New website"     ? "e.g. New website for my business" :
             category === "New web app"     ? "e.g. Customer booking system" :
             category === "Custom software" ? "e.g. Inventory management tool" :
+            category === "Data analytics"  ? "e.g. Sales dashboard for my Shopify store" :
             category === "Hardware / IT"   ? "e.g. Office network setup" :
             category === "Support request" ? "e.g. Update homepage hero text" :
                                              "Brief summary of your request"
@@ -149,6 +151,7 @@ export function RequestForm({
             category === "New website"     ? "Tell us about your business, goals, and any examples you like…" :
             category === "New web app"     ? "Describe the problem you're trying to solve and key features needed…" :
             category === "Custom software" ? "Describe the workflow or process you want to automate or improve…" :
+            category === "Data analytics"  ? "What data do you have and what decisions do you want it to help you make…" :
             category === "Hardware / IT"   ? "Describe the hardware, network, or IT issue — location and any error messages help…" :
             category === "Support request" ? "Describe what needs changing or fixing in as much detail as possible…" :
                                              "Describe what you need in as much detail as possible…"
