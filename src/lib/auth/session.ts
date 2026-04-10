@@ -81,3 +81,13 @@ export async function requireSession() {
 
   return session;
 }
+
+export async function requireAdmin() {
+  const session = await requireSession();
+
+  if (session.role !== "ADMIN") {
+    redirect("/portal");
+  }
+
+  return session;
+}

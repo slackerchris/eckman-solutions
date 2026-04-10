@@ -3,7 +3,7 @@
 set -eu
 
 echo "Applying database schema..."
-node ./node_modules/prisma/build/index.js db push
+npx prisma db push
 
 if [ "${BOOTSTRAP_ADMIN:-false}" = "true" ]; then
   echo "Bootstrapping portal admin..."

@@ -30,6 +30,9 @@ export default async function PortalLayout({
           <nav style={{ display: "flex", alignItems: "center", gap: "20px", fontSize: ".875rem", color: "var(--muted)" }}>
             <Link href="/">Back to website</Link>
             {session ? <Link href="/portal">Dashboard</Link> : null}
+            {session?.role === "ADMIN" ? (
+              <Link href="/portal/admin" style={{ color: "var(--accent)", fontWeight: 600 }}>Admin</Link>
+            ) : null}
             {session ? (
               <form action={logoutPortalAction}>
                 <button
