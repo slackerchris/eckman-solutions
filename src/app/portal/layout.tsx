@@ -11,30 +11,30 @@ export default async function PortalLayout({
   const session = await getSession();
 
   return (
-    <div className="min-h-screen pb-12 pt-6">
-      <div className="shell">
-        <header className="panel flex flex-col gap-4 rounded-[1.75rem] px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+    <div style={{ minHeight: "100vh", background: "var(--paper)" }}>
+      <header style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
+        <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0" }}>
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+            <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
               Eckman Solutions
             </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">
+            <h1 style={{ fontSize: "1.1rem", fontWeight: 700, letterSpacing: "-.025em", color: "var(--ink)", marginTop: "2px" }}>
               Client portal
             </h1>
             {session ? (
-              <p className="mt-2 text-sm text-[var(--muted)]">
+              <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>
                 Signed in as {session.name ?? session.email}
               </p>
             ) : null}
           </div>
-          <nav className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+          <nav style={{ display: "flex", alignItems: "center", gap: "20px", fontSize: ".875rem", color: "var(--muted)" }}>
             <Link href="/">Back to website</Link>
             {session ? <Link href="/portal">Dashboard</Link> : null}
             {session ? (
               <form action={logoutPortalAction}>
                 <button
                   type="submit"
-                  className="rounded-full border border-[var(--line)] px-4 py-2 text-[var(--foreground)] transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".875rem", color: "var(--ink)", background: "transparent", cursor: "pointer" }}
                 >
                   Sign out
                 </button>
@@ -43,9 +43,9 @@ export default async function PortalLayout({
               <Link href="/portal/login">Login</Link>
             )}
           </nav>
-        </header>
-        <div className="pt-6">{children}</div>
-      </div>
+        </div>
+      </header>
+      <main>{children}</main>
     </div>
   );
 }

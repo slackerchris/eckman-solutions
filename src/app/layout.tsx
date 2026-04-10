@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Sora } from "next/font/google";
+import { DM_Sans, Source_Serif_4 } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
+import { FadeObserver } from "@/components/fade-observer";
 
-const sora = Sora({
-  variable: "--font-sora",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -40,19 +44,39 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read theme cookie set by ThemeToggle so SSR and client agree → no hydration mismatch
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get("theme")?.value;
+  // "system" and missing cookie both default to no attribute (let CSS/media query decide)
+  const dataTheme = themeCookie === "dark" ? "dark" : themeCookie === "light" ? "light" : undefined;
+
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${plexMono.variable} h-full scroll-smooth`}
+      className={`${dmSans.variable} ${sourceSerif.variable}`}
+      data-theme={dataTheme}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)] antialiased">
-        {children}
-      </body>
+      <head>
+        {/* Sync data-theme before paint for system-preference detection & instant switching */}
+        <script dangerouslySetInnerHTML={{ __html: `
+(function(){
+  var s=localStorage.getItem('theme');
+  var d=document.documentElement;
+  if(s==='dark'||(s==='system'||!s)&&window.matchMedia('(prefers-color-scheme:dark)').matches){
+    d.setAttribute('data-theme','dark');
+  } else if(s==='light'){
+    d.setAttribute('data-theme','light');
+  }
+})();
+        `}} />
+      </head>
+      <body><FadeObserver />{children}</body>
     </html>
   );
 }

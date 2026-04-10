@@ -13,7 +13,7 @@ services:
       PORTAL_ADMIN_PASSWORD: ${PORTAL_ADMIN_PASSWORD:-}
       PORTAL_ADMIN_NAME: ${PORTAL_ADMIN_NAME:-Portal Admin}
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - eckman-data:/app/data
 

@@ -11,11 +11,11 @@ export function PortalLoginForm() {
   );
 
   return (
-    <form className="space-y-4" action={formAction}>
+    <form style={{ display: "flex", flexDirection: "column", gap: "20px" }} action={formAction}>
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-strong)]"
+          style={{ display: "block", fontFamily: "monospace", fontSize: ".72rem", textTransform: "uppercase", letterSpacing: ".16em", color: "var(--accent)", marginBottom: "8px" }}
         >
           Client email
         </label>
@@ -23,7 +23,7 @@ export function PortalLoginForm() {
           id="email"
           name="email"
           type="email"
-          className="w-full rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+          style={{ width: "100%", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px 16px", fontSize: "1rem", background: "var(--paper)", color: "var(--ink)", outline: "none", boxSizing: "border-box" }}
           placeholder="you@business.com"
           defaultValue="client@eckman.solutions"
           required
@@ -32,7 +32,7 @@ export function PortalLoginForm() {
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-strong)]"
+          style={{ display: "block", fontFamily: "monospace", fontSize: ".72rem", textTransform: "uppercase", letterSpacing: ".16em", color: "var(--accent)", marginBottom: "8px" }}
         >
           Password
         </label>
@@ -40,26 +40,27 @@ export function PortalLoginForm() {
           id="password"
           name="password"
           type="password"
-          className="w-full rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent)]"
+          style={{ width: "100%", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px 16px", fontSize: "1rem", background: "var(--paper)", color: "var(--ink)", outline: "none", boxSizing: "border-box" }}
           placeholder="Portal password"
           required
         />
       </div>
       {state.error ? (
-        <p className="rounded-2xl border border-[#d97706]/30 bg-[#fff2db] px-4 py-3 text-sm text-[#9a3412]">
+        <p style={{ borderRadius: "10px", border: "1px solid var(--border)", padding: "14px 16px", fontSize: ".9rem", background: "var(--accent-soft)", color: "var(--ink)" }}>
           {state.error}
         </p>
       ) : null}
       <button
         type="submit"
-        className="w-full rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="btn-primary"
+        style={{ width: "100%", justifyContent: "center", padding: "16px", fontSize: "1rem" }}
         disabled={isPending}
       >
-        {isPending ? "Signing in..." : "Sign in to portal"}
+        {isPending ? "Signing in…" : "Sign in to portal"}
       </button>
-      <p className="text-sm leading-7 text-[var(--muted)]">
-        This login now uses a real server-side session. Create your first portal
-        user with the CLI command documented in the README before deploying.
+      <p style={{ fontSize: ".82rem", color: "var(--muted)", lineHeight: 1.6 }}>
+        This login uses a real server-side session. Create your first portal
+        user with the CLI command in the README before deploying.
       </p>
     </form>
   );

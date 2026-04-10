@@ -108,6 +108,7 @@ That is the full install path. On container startup it will:
 - Pull and start the published Next.js image from GHCR
 - Create or update the SQLite schema
 - Bootstrap the first admin user when `BOOTSTRAP_ADMIN=true`
+- Publish the app on host port `3001`
 - Persist the database in the Docker volume mounted at `/app/data`
 
 Useful Docker Compose commands:
@@ -124,6 +125,12 @@ If you want to pin a specific image version instead of `latest`, set:
 
 ```bash
 ECKMAN_IMAGE="ghcr.io/slackerchris/eckman-solutions:sha-c299823"
+```
+
+If port `3000` is already used on your server, this Compose file already avoids the conflict by publishing to host port `3001` while keeping the app on container port `3000`.
+
+```bash
+http://your-server:3001
 ```
 
 After the first successful boot, you can set `BOOTSTRAP_ADMIN="false"` in `.env` so later restarts do not re-run admin bootstrap logic unnecessarily.

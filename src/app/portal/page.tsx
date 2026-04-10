@@ -38,7 +38,7 @@ export default async function PortalPage() {
         {portalStats.map((item) => (
           <article
             key={item.label}
-            className="rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,255,255,0.75)] p-5"
+            className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card)] p-5"
           >
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
               {item.label}
