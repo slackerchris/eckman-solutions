@@ -34,7 +34,12 @@ export async function updateProfileAction(
   const updated = await prisma.user.update({
     where: { id: session.userId },
     data: { name, email },
+  }).catch((e) => {
+    console.error("updateProfileAction: prisma.user.update failed:", e);
+    return null;
   });
+
+  if (!updated) return { error: "Failed to update profile. Please try again." };
 
   // Refresh the session cookie so the header picks up the new name/email
   await createSession({
@@ -68,7 +73,12 @@ export async function changePasswordAction(
   if (!matches) return { error: "Current password is incorrect." };
 
   const hash = await bcrypt.hash(next, 12);
-  await prisma.user.update({ where: { id: session.userId }, data: { passwordHash: hash } });
+  const updated = await prisma.user.update({ where: { id: session.userId }, data: { passwordHash: hash } }).catch((e) => {
+    console.error("changePasswordAction: prisma.user.update failed:", e);
+    return null;
+  });
+
+  if (!updated) return { error: "Failed to change password. Please try again." };
 
   return { success: "Password changed." };
 }

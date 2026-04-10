@@ -2,6 +2,12 @@
 
 set -eu
 
+echo "Checking data directory is writable..."
+touch /app/data/.write-test && rm /app/data/.write-test || {
+  echo "ERROR: /app/data is not writable. Mount a writable volume at /app/data."
+  exit 1
+}
+
 echo "Applying database schema..."
 npx prisma db push
 

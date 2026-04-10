@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+ENV DATABASE_URL=file:/app/data/portal.db
 
 # Layer 1: prisma CLI + all transitive deps (effect, c12, fast-check, etc.)
 COPY --from=prisma-cli /app/node_modules ./node_modules

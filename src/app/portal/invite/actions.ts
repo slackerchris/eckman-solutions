@@ -17,7 +17,12 @@ export async function createInviteAction(): Promise<InviteActionState> {
   await requireAdmin();
 
   const token = randomBytes(32).toString("hex");
-  await prisma.invite.create({ data: { token } });
+  try {
+    await prisma.invite.create({ data: { token } });
+  } catch (e) {
+    console.error("createInviteAction failed:", e);
+    return { error: "Failed to create invite. Please try again." };
+  }
 
   return { token };
 }
@@ -54,15 +59,21 @@ export async function signupWithInviteAction(
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: "CLIENT" },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: { name, email, passwordHash, role: "CLIENT" },
+    });
 
-  // Mark invite as used
-  await prisma.invite.update({
-    where: { token },
-    data: { usedAt: new Date() },
-  });
+    // Mark invite as used
+    await prisma.invite.update({
+      where: { token },
+      data: { usedAt: new Date() },
+    });
+  } catch (e) {
+    console.error("signupWithInviteAction failed:", e);
+    return { error: "Failed to create account. Please try again." };
+  }
 
   await createSession({
     userId: user.id,
