@@ -25,6 +25,11 @@ const services = [
     desc: "When off-the-shelf tools don't fit, I build software shaped around your workflow.",
   },
   {
+    href: "/services/data-analytics",
+    label: "Data Analytics",
+    desc: "Dashboards, automated reporting, and plain-English insights from the data you already have.",
+  },
+  {
     href: "/services/hardware",
     label: "Hardware & IT Support",
     desc: "On-site setup, troubleshooting, and ongoing support for the tech that keeps you running.",

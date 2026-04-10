@@ -4,10 +4,11 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const SERVICE_LINKS = [
-  { href: "/services/websites",       label: "Websites"           },
-  { href: "/services/web-apps",       label: "Web Apps"           },
-  { href: "/services/custom-software", label: "Custom Software"   },
-  { href: "/services/hardware",        label: "Hardware & IT"     },
+  { href: "/services/websites",        label: "Websites"        },
+  { href: "/services/web-apps",        label: "Web Apps"        },
+  { href: "/services/custom-software", label: "Custom Software" },
+  { href: "/services/data-analytics",  label: "Data Analytics"  },
+  { href: "/services/hardware",        label: "Hardware & IT"   },
 ];
 
 const NAV = [
