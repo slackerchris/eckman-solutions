@@ -4,6 +4,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { deleteSupportItemAction } from "@/app/portal/admin/actions";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const metadata: Metadata = { title: "Support Items — Admin" };
 
@@ -51,15 +52,11 @@ export default async function AdminSupportPage() {
                 >
                   Edit
                 </Link>
-                <form action={deleteSupportItemAction.bind(null, item.id)}>
-                  <button
-                    type="submit"
-                    style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
-                    onClick={(e) => { if (!confirm("Delete this support item?")) e.preventDefault(); }}
-                  >
-                    Delete
-                  </button>
-                </form>
+                <ConfirmDeleteButton
+                  action={deleteSupportItemAction.bind(null, item.id)}
+                  message="Delete this support item?"
+                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
+                />
               </div>
             </article>
           ))}

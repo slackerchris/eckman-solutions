@@ -5,8 +5,9 @@ import { notFound } from "next/navigation";
 import { requireAdmin, requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { SetPasswordForm } from "@/components/admin-user-forms";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import {
-  adminGenerateResetLinkAction,
+  adminGenerateResetLinkAndRedirectAction,
   adminToggleDisabledAction,
   adminDeleteUserAction,
 } from "@/app/portal/admin/users/actions";
@@ -57,15 +58,6 @@ export default async function AdminUserDetailPage({
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ??
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
-  const generateResetLinkWithRedirect = async () => {
-    "use server";
-    const result = await adminGenerateResetLinkAction(id);
-    if (result.resetLink) {
-      const { redirect } = await import("next/navigation");
-      redirect(`/portal/admin/users/${id}?resetLink=${result.resetLink}`);
-    }
-  };
 
   return (
     <section style={{ maxWidth: "680px" }}>
@@ -176,7 +168,7 @@ export default async function AdminUserDetailPage({
           </p>
         </div>
         <div style={sectionBodyStyle}>
-          <form action={generateResetLinkWithRedirect}>
+          <form action={adminGenerateResetLinkAndRedirectAction.bind(null, id)}>
             <button
               type="submit"
               style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", fontWeight: 600, background: "transparent", color: "var(--ink)", cursor: "pointer" }}
@@ -229,19 +221,12 @@ export default async function AdminUserDetailPage({
                   Permanently removes the user. Their projects will be unassigned, not deleted.
                 </p>
               </div>
-              <form
+              <ConfirmDeleteButton
                 action={adminDeleteUserAction.bind(null, id)}
-                onSubmit={(e) => {
-                  if (!confirm(`Delete ${user.name}'s account? This cannot be undone.`)) e.preventDefault();
-                }}
-              >
-                <button
-                  type="submit"
-                  style={{ border: "1px solid #c0392b", borderRadius: "999px", padding: "9px 20px", fontSize: ".825rem", fontWeight: 600, background: "#c0392b", color: "#fff", cursor: "pointer", whiteSpace: "nowrap" }}
-                >
-                  Delete account
-                </button>
-              </form>
+                message={`Delete ${user.name}'s account? This cannot be undone.`}
+                label="Delete account"
+                style={{ border: "1px solid #c0392b", borderRadius: "999px", padding: "9px 20px", fontSize: ".825rem", fontWeight: 600, background: "#c0392b", color: "#fff", cursor: "pointer", whiteSpace: "nowrap" }}
+              />
             </div>
           )}
 

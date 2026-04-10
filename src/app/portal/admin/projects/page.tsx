@@ -4,6 +4,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { deleteProjectAction } from "@/app/portal/admin/actions";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const metadata: Metadata = { title: "Projects — Admin" };
 
@@ -55,12 +56,11 @@ export default async function AdminProjectsPage() {
                 <Link href={`/portal/admin/projects/${p.id}/edit`} style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}>
                   Edit
                 </Link>
-                <form action={deleteProjectAction.bind(null, p.id)}>
-                  <button type="submit" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
-                    onClick={(e) => { if (!confirm("Delete this project?")) e.preventDefault(); }}>
-                    Delete
-                  </button>
-                </form>
+                <ConfirmDeleteButton
+                  action={deleteProjectAction.bind(null, p.id)}
+                  message="Delete this project?"
+                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
+                />
               </div>
             </article>
           ))}

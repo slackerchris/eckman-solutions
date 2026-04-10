@@ -38,7 +38,28 @@ export async function adminSetPasswordAction(
   return { success: "Password updated successfully." };
 }
 
-// ─── Generate one-time reset link ─────────────────────────────────────────────
+// ─── Generate one-time reset link (with redirect) ────────────────────────────
+
+export async function adminGenerateResetLinkAndRedirectAction(userId: string) {
+  await requireAdmin();
+
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { resetToken: token, resetTokenExpiresAt: expiresAt },
+    });
+  } catch (e) {
+    console.error("adminGenerateResetLinkAndRedirectAction failed:", e);
+    throw e;
+  }
+
+  redirect(`/portal/admin/users/${userId}?resetLink=${token}`);
+}
+
+// ─── Generate one-time reset link (return token only) ────────────────────────
 
 export async function adminGenerateResetLinkAction(
   userId: string,
