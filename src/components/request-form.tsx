@@ -37,10 +37,12 @@ const labelStyle = {
 };
 
 const CATEGORIES = [
-  { value: "New website",     label: "New website" },
-  { value: "New web app",     label: "New web app" },
-  { value: "Support request", label: "Support / update (existing project)" },
-  { value: "Other",           label: "Other" },
+  { value: "New website",       label: "New website" },
+  { value: "New web app",       label: "New web app" },
+  { value: "Custom software",   label: "Custom software" },
+  { value: "Hardware / IT",     label: "Hardware & IT support" },
+  { value: "Support request",   label: "Support / update (existing project)" },
+  { value: "Other",             label: "Other" },
 ] as const;
 
 type Project = { id: string; name: string };
@@ -126,6 +128,8 @@ export function RequestForm({
           placeholder={
             category === "New website"     ? "e.g. New website for my business" :
             category === "New web app"     ? "e.g. Customer booking system" :
+            category === "Custom software" ? "e.g. Inventory management tool" :
+            category === "Hardware / IT"   ? "e.g. Office network setup" :
             category === "Support request" ? "e.g. Update homepage hero text" :
                                              "Brief summary of your request"
           }
@@ -144,6 +148,8 @@ export function RequestForm({
           placeholder={
             category === "New website"     ? "Tell us about your business, goals, and any examples you like…" :
             category === "New web app"     ? "Describe the problem you're trying to solve and key features needed…" :
+            category === "Custom software" ? "Describe the workflow or process you want to automate or improve…" :
+            category === "Hardware / IT"   ? "Describe the hardware, network, or IT issue — location and any error messages help…" :
             category === "Support request" ? "Describe what needs changing or fixing in as much detail as possible…" :
                                              "Describe what you need in as much detail as possible…"
           }
