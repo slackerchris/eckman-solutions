@@ -17,15 +17,14 @@ export function PortalLoginForm() {
           htmlFor="email"
           style={{ display: "block", fontFamily: "monospace", fontSize: ".72rem", textTransform: "uppercase", letterSpacing: ".16em", color: "var(--accent)", marginBottom: "8px" }}
         >
-          Client email
+          Email
         </label>
         <input
           id="email"
           name="email"
           type="email"
           style={{ width: "100%", borderRadius: "10px", border: "1px solid var(--border)", padding: "14px 16px", fontSize: "1rem", background: "var(--paper)", color: "var(--ink)", outline: "none", boxSizing: "border-box" }}
-          placeholder="you@business.com"
-          defaultValue="client@eckman.solutions"
+          placeholder="you@example.com"
           required
         />
       </div>
@@ -46,7 +45,7 @@ export function PortalLoginForm() {
         />
       </div>
       {state.error ? (
-        <p style={{ borderRadius: "10px", border: "1px solid var(--border)", padding: "14px 16px", fontSize: ".9rem", background: "var(--accent-soft)", color: "var(--ink)" }}>
+        <p style={{ borderRadius: "10px", border: "1px solid rgba(220,38,38,.3)", padding: "14px 16px", fontSize: ".9rem", background: "rgba(220,38,38,.08)", color: "#dc2626" }}>
           {state.error}
         </p>
       ) : null}
@@ -58,10 +57,6 @@ export function PortalLoginForm() {
       >
         {isPending ? "Signing in…" : "Sign in to portal"}
       </button>
-      <p style={{ fontSize: ".82rem", color: "var(--muted)", lineHeight: 1.6 }}>
-        This login uses a real server-side session. Create your first portal
-        user with the CLI command in the README before deploying.
-      </p>
     </form>
   );
 }

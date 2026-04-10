@@ -11,30 +11,26 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [projectCount, invoiceCount, supportCount] = await Promise.all([
+  const [projectCount, invoiceCount, supportCount, unusedInviteCount] = await Promise.all([
     prisma.project.count(),
     prisma.invoice.count(),
     prisma.supportItem.count(),
+    prisma.invite.count({ where: { usedAt: null } }),
   ]);
 
   const sections = [
     { label: "Projects", href: "/portal/admin/projects", count: projectCount, description: "Manage active and completed projects shown in the portal." },
     { label: "Invoices", href: "/portal/admin/invoices", count: invoiceCount, description: "Create and update invoice records for the billing section." },
     { label: "Support items", href: "/portal/admin/support", count: supportCount, description: "Manage the support queue shown on the dashboard." },
+    { label: "Invites", href: "/portal/admin/invites", count: unusedInviteCount, description: "Generate single-use signup links to onboard new clients." },
   ];
 
   return (
     <section className="wrap" style={{ padding: "40px 0" }}>
       <div style={{ marginBottom: "32px" }}>
-        <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
-          Admin
-        </p>
         <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px" }}>
-          Content management
+          Admin
         </h2>
-        <p style={{ marginTop: "8px", color: "var(--muted)", fontSize: ".95rem" }}>
-          All changes appear immediately on the portal dashboard.
-        </p>
       </div>
 
       <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>

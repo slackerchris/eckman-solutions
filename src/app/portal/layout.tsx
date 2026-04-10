@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { logoutPortalAction } from "@/app/portal/actions";
 import { getSession } from "@/lib/auth/session";
+import { PortalExitLink } from "@/components/portal-exit-link";
 
 export default async function PortalLayout({
   children,
@@ -28,8 +29,9 @@ export default async function PortalLayout({
             ) : null}
           </div>
           <nav style={{ display: "flex", alignItems: "center", gap: "20px", fontSize: ".875rem", color: "var(--muted)" }}>
-            <Link href="/">Back to website</Link>
+            <PortalExitLink />
             {session ? <Link href="/portal">Dashboard</Link> : null}
+            {session ? <Link href="/portal/profile">Profile</Link> : null}
             {session?.role === "ADMIN" ? (
               <Link href="/portal/admin" style={{ color: "var(--accent)", fontWeight: 600 }}>Admin</Link>
             ) : null}

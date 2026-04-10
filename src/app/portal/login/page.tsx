@@ -27,9 +27,7 @@ export default async function PortalLoginPage() {
           <h2 style={{ fontSize: "1.6rem", fontWeight: 700, letterSpacing: "-.035em", color: "var(--ink)", marginTop: "8px" }}>
             Sign in to your portal
           </h2>
-          <p style={{ fontSize: ".9rem", color: "var(--muted)", marginTop: "8px", lineHeight: 1.6 }}>
-            View your project status, invoices, and support notes.
-          </p>
+
         </div>
         <div className="panel" style={{ borderRadius: "16px", padding: "36px" }}>
           <PortalLoginForm />

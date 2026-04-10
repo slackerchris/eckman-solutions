@@ -5,8 +5,7 @@ import { requireSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "Client Portal",
-  description:
-    "Dashboard preview for Eckman Solutions clients to review projects, sites, and billing.",
+  description: "Eckman Solutions client portal — projects, billing, and support.",
 };
 
 export default async function PortalPage() {
@@ -32,17 +31,11 @@ export default async function PortalPage() {
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
               Dashboard
             </p>
-            <h2 className="mt-3 text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[0.95] tracking-[-0.06em]">
-              Client workspace for websites, support, and billing.
+            <h2 className="mt-3 text-[clamp(1.4rem,2.5vw,2rem)] font-semibold leading-[1.15] tracking-[-0.04em]">
+              Welcome back, {session.name ?? session.email}.
             </h2>
-            <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--muted)]">
-              Welcome back, {session.name ?? session.email}. This portal keeps
-              active work, invoice history, and support priorities in one place.
-            </p>
           </div>
-          <span className="rounded-full bg-[var(--accent-soft)] px-4 py-2 font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-strong)]">
-            Authenticated portal session
-          </span>
+
         </div>
       </article>
 
@@ -55,7 +48,7 @@ export default async function PortalPage() {
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
               {item.label}
             </p>
-            <p className="mt-3 text-4xl font-semibold tracking-[-0.06em]">
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em]">
               {item.value}
             </p>
           </article>
