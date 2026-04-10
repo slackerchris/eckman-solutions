@@ -42,6 +42,10 @@ export default async function AdminSupportPage() {
               style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}
             >
               <div>
+                <p style={{ fontFamily: "monospace", fontSize: ".68rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", marginBottom: "4px" }}>
+                  {item.category ?? "General"}_
+                  <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.status}</span>
+                </p>
                 <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</p>
                 <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
               </div>
