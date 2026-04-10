@@ -1,8 +1,7 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${ECKMAN_IMAGE:-ghcr.io/slackerchris/eckman-solutions:latest}
+    pull_policy: always
     container_name: eckman-app
     restart: unless-stopped
     env_file:

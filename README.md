@@ -94,17 +94,18 @@ BOOTSTRAP_ADMIN="true"
 PORTAL_ADMIN_EMAIL="owner@eckman.solutions"
 PORTAL_ADMIN_PASSWORD="change-this-before-production"
 PORTAL_ADMIN_NAME="Owner"
+ECKMAN_IMAGE="ghcr.io/slackerchris/eckman-solutions:latest"
 ```
 
 3. Start the full app:
 
 ```bash
-docker compose up --build -d
+docker compose up -d
 ```
 
 That is the full install path. On container startup it will:
 
-- Build and start the Next.js app
+- Pull and start the published Next.js image from GHCR
 - Create or update the SQLite schema
 - Bootstrap the first admin user when `BOOTSTRAP_ADMIN=true`
 - Persist the database in the Docker volume mounted at `/app/data`
@@ -112,10 +113,17 @@ That is the full install path. On container startup it will:
 Useful Docker Compose commands:
 
 ```bash
-docker compose up --build -d
+docker compose pull
+docker compose up -d
 docker compose logs -f app
 docker compose restart app
 docker compose down
+```
+
+If you want to pin a specific image version instead of `latest`, set:
+
+```bash
+ECKMAN_IMAGE="ghcr.io/slackerchris/eckman-solutions:sha-c299823"
 ```
 
 After the first successful boot, you can set `BOOTSTRAP_ADMIN="false"` in `.env` so later restarts do not re-run admin bootstrap logic unnecessarily.
