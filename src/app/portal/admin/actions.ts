@@ -9,6 +9,7 @@ import { requireAdmin } from "@/lib/auth/session";
 
 export async function createProjectAction(formData: FormData) {
   await requireAdmin();
+  const userId = String(formData.get("userId") ?? "").trim() || null;
   try {
     await prisma.project.create({
       data: {
@@ -17,6 +18,7 @@ export async function createProjectAction(formData: FormData) {
         status: String(formData.get("status") ?? "").trim(),
         notes: String(formData.get("notes") ?? "").trim(),
         url: String(formData.get("url") ?? "").trim(),
+        userId,
       },
     });
   } catch (e) {
@@ -28,6 +30,7 @@ export async function createProjectAction(formData: FormData) {
 
 export async function updateProjectAction(id: string, formData: FormData) {
   await requireAdmin();
+  const userId = String(formData.get("userId") ?? "").trim() || null;
   try {
     await prisma.project.update({
       where: { id },
@@ -37,6 +40,7 @@ export async function updateProjectAction(id: string, formData: FormData) {
         status: String(formData.get("status") ?? "").trim(),
         notes: String(formData.get("notes") ?? "").trim(),
         url: String(formData.get("url") ?? "").trim(),
+        userId,
       },
     });
   } catch (e) {
@@ -61,12 +65,14 @@ export async function deleteProjectAction(id: string) {
 
 export async function createInvoiceAction(formData: FormData) {
   await requireAdmin();
+  const projectId = String(formData.get("projectId") ?? "").trim() || null;
   try {
     await prisma.invoice.create({
       data: {
         label: String(formData.get("label") ?? "").trim(),
         amount: String(formData.get("amount") ?? "").trim(),
         status: String(formData.get("status") ?? "").trim(),
+        projectId,
       },
     });
   } catch (e) {
@@ -78,6 +84,7 @@ export async function createInvoiceAction(formData: FormData) {
 
 export async function updateInvoiceAction(id: string, formData: FormData) {
   await requireAdmin();
+  const projectId = String(formData.get("projectId") ?? "").trim() || null;
   try {
     await prisma.invoice.update({
       where: { id },
@@ -85,6 +92,7 @@ export async function updateInvoiceAction(id: string, formData: FormData) {
         label: String(formData.get("label") ?? "").trim(),
         amount: String(formData.get("amount") ?? "").trim(),
         status: String(formData.get("status") ?? "").trim(),
+        projectId,
       },
     });
   } catch (e) {
@@ -109,11 +117,14 @@ export async function deleteInvoiceAction(id: string) {
 
 export async function createSupportItemAction(formData: FormData) {
   await requireAdmin();
+  const projectId = String(formData.get("projectId") ?? "").trim() || null;
   try {
     await prisma.supportItem.create({
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        status: String(formData.get("status") ?? "Open").trim() || "Open",
+        projectId,
       },
     });
   } catch (e) {
@@ -125,12 +136,15 @@ export async function createSupportItemAction(formData: FormData) {
 
 export async function updateSupportItemAction(id: string, formData: FormData) {
   await requireAdmin();
+  const projectId = String(formData.get("projectId") ?? "").trim() || null;
   try {
     await prisma.supportItem.update({
       where: { id },
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        status: String(formData.get("status") ?? "Open").trim() || "Open",
+        projectId,
       },
     });
   } catch (e) {

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { updateProjectAction } from "@/app/portal/admin/actions";
+import { SERVICE_TYPES, PROJECT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Edit Project — Admin" };
 
@@ -17,6 +18,17 @@ const inputStyle = {
   background: "var(--paper)",
   color: "var(--ink)",
   boxSizing: "border-box" as const,
+};
+
+const selectStyle = {
+  ...inputStyle,
+  appearance: "none" as const,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23888' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+  backgroundRepeat: "no-repeat" as const,
+  backgroundPosition: "right 12px center",
+  backgroundSize: "20px",
+  paddingRight: "40px",
+  cursor: "pointer",
 };
 
 const labelStyle = {
@@ -32,7 +44,10 @@ const labelStyle = {
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
   const { id } = await params;
-  const project = await prisma.project.findUnique({ where: { id } });
+  const [project, clients] = await Promise.all([
+    prisma.project.findUnique({ where: { id } }),
+    prisma.user.findMany({ where: { role: "CLIENT" }, orderBy: { name: "asc" } }),
+  ]);
   if (!project) notFound();
 
   const action = updateProjectAction.bind(null, project.id);
@@ -52,12 +67,35 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
           <input id="name" name="name" required defaultValue={project.name} style={inputStyle} />
         </div>
         <div>
-          <label htmlFor="type" style={labelStyle}>Type</label>
-          <input id="type" name="type" required defaultValue={project.type} style={inputStyle} />
+          <label htmlFor="type" style={labelStyle}>Service type</label>
+          <select id="type" name="type" required defaultValue={project.type} style={selectStyle}>
+            {!SERVICE_TYPES.includes(project.type as (typeof SERVICE_TYPES)[number]) && (
+              <option value={project.type}>{project.type}</option>
+            )}
+            {SERVICE_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="status" style={labelStyle}>Status</label>
-          <input id="status" name="status" required defaultValue={project.status} style={inputStyle} />
+          <select id="status" name="status" required defaultValue={project.status} style={selectStyle}>
+            {!PROJECT_STATUSES.includes(project.status as (typeof PROJECT_STATUSES)[number]) && (
+              <option value={project.status}>{project.status}</option>
+            )}
+            {PROJECT_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="userId" style={labelStyle}>Assign to client (optional)</label>
+          <select id="userId" name="userId" defaultValue={project.userId ?? ""} style={selectStyle}>
+            <option value="">— Unassigned —</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="url" style={labelStyle}>URL (optional)</label>

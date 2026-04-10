@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import { createProjectAction } from "@/app/portal/admin/actions";
+import { SERVICE_TYPES, PROJECT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "New Project — Admin" };
 
@@ -17,6 +19,17 @@ const inputStyle = {
   boxSizing: "border-box" as const,
 };
 
+const selectStyle = {
+  ...inputStyle,
+  appearance: "none" as const,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23888' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+  backgroundRepeat: "no-repeat" as const,
+  backgroundPosition: "right 12px center",
+  backgroundSize: "20px",
+  paddingRight: "40px",
+  cursor: "pointer",
+};
+
 const labelStyle = {
   display: "block",
   fontSize: ".825rem",
@@ -29,6 +42,10 @@ const labelStyle = {
 
 export default async function NewProjectPage() {
   await requireAdmin();
+  const clients = await prisma.user.findMany({
+    where: { role: "CLIENT" },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <section className="wrap" style={{ padding: "40px 0", maxWidth: "640px" }}>
@@ -45,12 +62,29 @@ export default async function NewProjectPage() {
           <input id="name" name="name" required style={inputStyle} placeholder="Main marketing website" />
         </div>
         <div>
-          <label htmlFor="type" style={labelStyle}>Type</label>
-          <input id="type" name="type" required style={inputStyle} placeholder="Website refresh" />
+          <label htmlFor="type" style={labelStyle}>Service type</label>
+          <select id="type" name="type" required style={selectStyle}>
+            {SERVICE_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="status" style={labelStyle}>Status</label>
-          <input id="status" name="status" required style={inputStyle} placeholder="In progress" />
+          <select id="status" name="status" required style={selectStyle}>
+            {PROJECT_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="userId" style={labelStyle}>Assign to client (optional)</label>
+          <select id="userId" name="userId" style={selectStyle}>
+            <option value="">— Unassigned —</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="url" style={labelStyle}>URL (optional)</label>

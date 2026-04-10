@@ -9,7 +9,10 @@ export const metadata: Metadata = { title: "Projects — Admin" };
 
 export default async function AdminProjectsPage() {
   await requireAdmin();
-  const projects = await prisma.project.findMany({ orderBy: { createdAt: "desc" } });
+  const projects = await prisma.project.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { user: { select: { name: true, email: true } } },
+  });
 
   return (
     <section className="wrap" style={{ padding: "40px 0" }}>
@@ -22,11 +25,7 @@ export default async function AdminProjectsPage() {
             Projects
           </h2>
         </div>
-        <Link
-          href="/portal/admin/projects/new"
-          className="btn-primary"
-          style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
-        >
+        <Link href="/portal/admin/projects/new" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}>
           + New project
         </Link>
       </div>
@@ -36,32 +35,29 @@ export default async function AdminProjectsPage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {projects.map((p) => (
-            <article
-              key={p.id}
-              style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}
-            >
+            <article key={p.id} style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
               <div>
                 <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".16em", color: "var(--accent)" }}>{p.type}</p>
                 <h3 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--ink)", marginTop: "4px" }}>{p.name}</h3>
-                <p style={{ fontSize: ".825rem", color: "var(--muted)", marginTop: "4px" }}>
-                  <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "2px 10px", marginRight: "8px" }}>{p.status}</span>
-                  {p.url && <span>{p.url}</span>}
+                <p style={{ fontSize: ".825rem", color: "var(--muted)", marginTop: "4px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "2px 10px" }}>{p.status}</span>
+                  {p.user ? (
+                    <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "2px 10px", color: "var(--accent)" }}>
+                      {p.user.name}
+                    </span>
+                  ) : (
+                    <span style={{ opacity: 0.45 }}>Unassigned</span>
+                  )}
                 </p>
                 {p.notes && <p style={{ fontSize: ".825rem", color: "var(--muted)", marginTop: "6px" }}>{p.notes}</p>}
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                <Link
-                  href={`/portal/admin/projects/${p.id}/edit`}
-                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}
-                >
+                <Link href={`/portal/admin/projects/${p.id}/edit`} style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}>
                   Edit
                 </Link>
                 <form action={deleteProjectAction.bind(null, p.id)}>
-                  <button
-                    type="submit"
-                    style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
-                    onClick={(e) => { if (!confirm("Delete this project?")) e.preventDefault(); }}
-                  >
+                  <button type="submit" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
+                    onClick={(e) => { if (!confirm("Delete this project?")) e.preventDefault(); }}>
                     Delete
                   </button>
                 </form>

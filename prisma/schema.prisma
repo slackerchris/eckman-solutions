@@ -13,24 +13,29 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
-  email        String   @unique
+  email        String    @unique
   passwordHash String
-  role         Role     @default(CLIENT)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         Role      @default(CLIENT)
+  projects     Project[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  type      String
-  status    String
-  notes     String   @default("")
-  url       String   @default("")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  name         String
+  type         String
+  status       String
+  notes        String        @default("")
+  url          String        @default("")
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id])
+  invoices     Invoice[]
+  supportItems SupportItem[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Invoice {
@@ -38,6 +43,8 @@ model Invoice {
   label     String
   amount    String
   status    String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -46,6 +53,9 @@ model SupportItem {
   id        String   @id @default(cuid())
   title     String
   detail    String
+  status    String   @default("Open")
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
