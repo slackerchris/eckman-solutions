@@ -15,7 +15,7 @@ export default async function AdminProjectsPage() {
   });
 
   return (
-    <section className="wrap" style={{ padding: "40px 0" }}>
+    <section style={{ padding: "0" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "28px" }}>
         <div>
           <Link href="/portal/admin" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>

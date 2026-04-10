@@ -28,7 +28,7 @@ export default async function AdminPage() {
   ];
 
   return (
-    <section className="wrap" style={{ padding: "40px 0" }}>
+    <section style={{ padding: "0" }}>
       <div style={{ marginBottom: "32px" }}>
         <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px" }}>
           Admin

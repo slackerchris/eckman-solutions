@@ -53,7 +53,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   const action = updateInvoiceAction.bind(null, invoice.id);
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "560px" }}>
+    <section style={{ maxWidth: "560px" }}>
       <Link href="/portal/admin/invoices" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
         ← Invoices
       </Link>

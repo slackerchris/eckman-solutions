@@ -53,7 +53,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   const action = updateProjectAction.bind(null, project.id);
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "640px" }}>
+    <section style={{ maxWidth: "640px" }}>
       <Link href="/portal/admin/projects" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
         ← Projects
       </Link>

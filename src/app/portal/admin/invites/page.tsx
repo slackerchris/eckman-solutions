@@ -19,7 +19,7 @@ export default async function AdminInvitesPage() {
   const invites = await prisma.invite.findMany({ orderBy: { createdAt: "desc" }, take: 20 });
 
   return (
-    <section className="wrap" style={{ padding: "40px 0" }}>
+    <section style={{ padding: "0" }}>
       <div style={{ marginBottom: "32px" }}>
         <Link href="/portal/admin" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
           ← Admin

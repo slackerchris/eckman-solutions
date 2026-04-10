@@ -17,7 +17,7 @@ export default async function ProfilePage() {
   const session = await requireSession();
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "600px" }}>
+    <section style={{ maxWidth: "600px" }}>
       <Link href="/portal" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
         ← Dashboard
       </Link>

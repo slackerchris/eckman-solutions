@@ -20,7 +20,7 @@ export default async function NewRequestPage({ searchParams }: { searchParams: P
   });
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "640px" }}>
+    <section style={{ maxWidth: "640px" }}>
       <Link
         href="/portal"
         style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}

@@ -48,7 +48,7 @@ export default async function NewSupportItemPage() {
   });
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "560px" }}>
+    <section style={{ maxWidth: "560px" }}>
       <Link href="/portal/admin/support" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
         ← Support items
       </Link>

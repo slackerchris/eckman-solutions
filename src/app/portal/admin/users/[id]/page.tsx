@@ -68,7 +68,7 @@ export default async function AdminUserDetailPage({
   };
 
   return (
-    <section className="wrap" style={{ padding: "40px 0", maxWidth: "680px" }}>
+    <section style={{ maxWidth: "680px" }}>
       <Link
         href="/portal/admin/users"
         style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}

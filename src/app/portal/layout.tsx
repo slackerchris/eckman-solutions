@@ -60,7 +60,11 @@ export default async function PortalLayout({
           </nav>
         </div>
       </header>
-      <main>{children}</main>
+      <main>
+        <div className="wrap" style={{ paddingTop: "40px", paddingBottom: "60px" }}>
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

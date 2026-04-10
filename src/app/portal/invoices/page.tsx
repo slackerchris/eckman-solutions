@@ -24,7 +24,7 @@ export default async function ClientInvoicesPage() {
     .length;
 
   return (
-    <section className="wrap" style={{ padding: "40px 0" }}>
+    <section style={{ padding: "0" }}>
       <Link href="/portal" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
         ← Dashboard
       </Link>
