@@ -3,7 +3,7 @@
 set -eu
 
 echo "Applying database schema..."
-npx prisma db push
+node ./node_modules/prisma/build/index.js db push
 
 if [ "${BOOTSTRAP_ADMIN:-false}" = "true" ]; then
   echo "Bootstrapping portal admin..."
@@ -11,4 +11,4 @@ if [ "${BOOTSTRAP_ADMIN:-false}" = "true" ]; then
 fi
 
 echo "Starting application..."
-exec npm run start -- --hostname 0.0.0.0 --port "${PORT:-3000}"
+exec node server.js
