@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Eckman Solutions
 
-## Getting Started
+Marketing website and client portal for https://eckman.solutions built with Next.js.
 
-First, run the development server:
+## What is included
+
+- Public-facing services website for analytics, websites, apps, custom software, and small business hardware support.
+- Protected portal login backed by a real SQLite database and signed HTTP-only session cookies.
+- Self-hosting support for a single VPS, Docker, Nginx, PM2, and systemd.
+
+## Stack
+
+- Next.js 16 App Router
+- Tailwind CSS 4
+- Prisma with SQLite for the initial self-hosted portal database
+- bcrypt password hashing
+- jose signed session cookies
+
+## Environment variables
+
+Copy `.env.example` to `.env` and set real values:
+
+```bash
+cp .env.example .env
+```
+
+Required values:
+
+```bash
+DATABASE_URL="file:../data/portal.db"
+SESSION_SECRET="generate-with-openssl-rand-base64-32"
+```
+
+Generate a session secret with:
+
+```bash
+openssl rand -base64 32
+```
+
+## Local development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create the database schema:
+
+```bash
+npm run db:push
+```
+
+Create the first portal user:
+
+```bash
+npm run user:create -- --email client@eckman.solutions --password 'change-this-now' --name 'Portal Client' --role ADMIN
+```
+
+Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The public site lives at `/` and the protected portal lives at `/portal`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Portal authentication
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The portal now uses a real server-side authentication flow:
 
-## Learn More
+- Passwords are hashed with bcrypt.
+- Users are stored in SQLite through Prisma.
+- Successful login writes an HTTP-only signed cookie.
+- `/portal` redirects to `/portal/login` when no valid session exists.
 
-To learn more about Next.js, take a look at the following resources:
+This is designed for a single self-hosted instance. If you later run multiple app instances, move the database to Postgres and consider a shared session or cache layer.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Docker Compose deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you want this installed and deployed 100% through Docker Compose, use this path.
 
-## Deploy on Vercel
+1. Copy the environment file:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cp .env.example .env
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. Edit `.env` and set at minimum:
+
+```bash
+SESSION_SECRET="your-real-secret"
+BOOTSTRAP_ADMIN="true"
+PORTAL_ADMIN_EMAIL="owner@eckman.solutions"
+PORTAL_ADMIN_PASSWORD="change-this-before-production"
+PORTAL_ADMIN_NAME="Owner"
+```
+
+3. Start the full app:
+
+```bash
+docker compose up --build -d
+```
+
+That is the full install path. On container startup it will:
+
+- Build and start the Next.js app
+- Create or update the SQLite schema
+- Bootstrap the first admin user when `BOOTSTRAP_ADMIN=true`
+- Persist the database in the Docker volume mounted at `/app/data`
+
+Useful Docker Compose commands:
+
+```bash
+docker compose up --build -d
+docker compose logs -f app
+docker compose restart app
+docker compose down
+```
+
+After the first successful boot, you can set `BOOTSTRAP_ADMIN="false"` in `.env` so later restarts do not re-run admin bootstrap logic unnecessarily.
+
+## Single VPS deployment
+
+This repo includes the base files for a straightforward VPS setup:
+
+- Nginx config: `deploy/nginx/eckman.solutions.conf`
+- PM2 app config: `ecosystem.config.cjs`
+- systemd unit: `deploy/systemd/eckman.service`
+
+Suggested Ubuntu flow:
+
+1. Install Node.js 22, Nginx, and PM2.
+2. Clone this repo to `/var/www/eckman`.
+3. Copy `.env.example` to a real env file and store production values in `/etc/eckman/eckman.env`.
+4. Run `npm install`.
+5. Run `npm run build`.
+6. Run `npm run db:push`.
+7. Run `npm run user:create -- --email you@eckman.solutions --password 'strong-password-here' --name 'Owner' --role ADMIN`.
+8. Copy `deploy/nginx/eckman.solutions.conf` into your Nginx sites config and reload Nginx.
+9. Copy `deploy/systemd/eckman.service` to `/etc/systemd/system/eckman.service`.
+10. Run `sudo systemctl daemon-reload && sudo systemctl enable --now eckman`.
+11. Add TLS with Let's Encrypt.
+
+The included Nginx config is intentionally minimal. Add your SSL config, stronger rate limiting, and any backup policy you need for production.
+
+## Production notes
+
+- SQLite is fine for a single VPS or one Docker container with a mounted volume.
+- Back up the `data` directory because it contains the portal database.
+- Keep `SESSION_SECRET` stable across restarts.
+- If you move to multiple instances later, switch the database to Postgres and revisit session, cache, and deployment coordination.
+
+## Useful commands
+
+```bash
+npm run lint
+npm run build
+npm run db:push
+npm run user:create -- --email client@example.com --password 'strong-password' --name 'Client Name' --role CLIENT
+```

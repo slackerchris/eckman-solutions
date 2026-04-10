@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eckman-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: "3000"
+      BOOTSTRAP_ADMIN: ${BOOTSTRAP_ADMIN:-false}
+      PORTAL_ADMIN_EMAIL: ${PORTAL_ADMIN_EMAIL:-}
+      PORTAL_ADMIN_PASSWORD: ${PORTAL_ADMIN_PASSWORD:-}
+      PORTAL_ADMIN_NAME: ${PORTAL_ADMIN_NAME:-Portal Admin}
+    ports:
+      - "3000:3000"
+    volumes:
+      - eckman-data:/app/data
+
+volumes:
+  eckman-data:

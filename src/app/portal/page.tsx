@@ -1,0 +1,150 @@
+import type { Metadata } from "next";
+
+import { invoices, portalProjects, portalStats, supportQueue } from "@/lib/site";
+import { requireSession } from "@/lib/auth/session";
+
+export const metadata: Metadata = {
+  title: "Client Portal",
+  description:
+    "Dashboard preview for Eckman Solutions clients to review projects, sites, and billing.",
+};
+
+export default async function PortalPage() {
+  const session = await requireSession();
+
+  return (
+    <section className="space-y-6">
+      <article className="panel rounded-[1.8rem] p-6 sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+              Dashboard
+            </p>
+            <h2 className="mt-3 text-[clamp(2.2rem,4vw,3.8rem)] font-semibold leading-[0.95] tracking-[-0.06em]">
+              Client workspace for websites, support, and billing.
+            </h2>
+            <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--muted)]">
+              Welcome back, {session.name ?? session.email}. This portal keeps
+              active work, invoice history, and support priorities in one place.
+            </p>
+          </div>
+          <span className="rounded-full bg-[var(--accent-soft)] px-4 py-2 font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-strong)]">
+            Authenticated portal session
+          </span>
+        </div>
+      </article>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {portalStats.map((item) => (
+          <article
+            key={item.label}
+            className="rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,255,255,0.75)] p-5"
+          >
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+              {item.label}
+            </p>
+            <p className="mt-3 text-4xl font-semibold tracking-[-0.06em]">
+              {item.value}
+            </p>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <article className="panel rounded-[1.8rem] p-6 sm:p-8">
+          <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+                Active work
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+                Current projects
+              </h3>
+            </div>
+            <span className="status-dot" aria-hidden="true" />
+          </div>
+          <div className="mt-5 space-y-4">
+            {portalProjects.map((project) => (
+              <article
+                key={project.name}
+                className="rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5"
+              >
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-[0.16em] text-[var(--accent-strong)]">
+                      {project.type}
+                    </p>
+                    <h4 className="mt-2 text-xl font-semibold">{project.name}</h4>
+                  </div>
+                  <span className="rounded-full border border-[var(--line)] px-3 py-1 text-sm text-[var(--muted)]">
+                    {project.status}
+                  </span>
+                </div>
+                <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
+                  {project.updated}
+                </p>
+                <p className="mt-4 text-sm font-medium text-[var(--foreground)]">
+                  {project.link}
+                </p>
+              </article>
+            ))}
+          </div>
+        </article>
+
+        <div className="space-y-6">
+          <article className="panel rounded-[1.8rem] p-6 sm:p-8">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+              Billing
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+              Invoice summary
+            </h3>
+            <div className="mt-5 space-y-3">
+              {invoices.map((invoice) => (
+                <article
+                  key={invoice.id}
+                  className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold">{invoice.label}</p>
+                      <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
+                        {invoice.id}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold">{invoice.amount}</p>
+                  </div>
+                  <p className="mt-3 text-sm text-[var(--accent-strong)]">
+                    {invoice.status}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </article>
+
+          <article className="panel rounded-[1.8rem] p-6 sm:p-8">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
+              Support queue
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+              Current requests
+            </h3>
+            <div className="mt-5 space-y-3">
+              {supportQueue.map((item) => (
+                <article
+                  key={item.title}
+                  className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-4"
+                >
+                  <p className="text-sm font-semibold">{item.title}</p>
+                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+                    {item.detail}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+  );
+}

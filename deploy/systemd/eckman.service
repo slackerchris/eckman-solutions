@@ -1,0 +1,17 @@
+[Unit]
+Description=Eckman Solutions Next.js application
+After=network.target
+
+[Service]
+Type=simple
+User=eckman
+WorkingDirectory=/var/www/eckman
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/eckman/eckman.env
+ExecStartPre=/usr/bin/npm run db:push
+ExecStart=/usr/bin/npx pm2-runtime start ecosystem.config.cjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
