@@ -65,6 +65,13 @@ export default async function PortalLayout({
           {children}
         </div>
       </main>
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "14px 0" }}>
+        <div className="wrap" style={{ display: "flex", justifyContent: "flex-end" }}>
+          <p style={{ fontFamily: "monospace", fontSize: ".65rem", color: "var(--muted)", opacity: 0.45, letterSpacing: ".1em" }}>
+            v{process.env.npm_package_version ?? require("../../../package.json").version}
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
