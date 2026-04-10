@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   description: "Eckman Solutions client portal — projects, billing, and support.",
 };
 
-export default async function PortalPage() {
+export default async function PortalPage({ searchParams }: { searchParams: Promise<{ submitted?: string }> }) {
+  const params = await searchParams;
+  const submitted = params.submitted === "1";
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
@@ -59,6 +61,13 @@ export default async function PortalPage() {
 
   return (
     <section className="space-y-6">
+      {/* Success banner */}
+      {submitted && (
+        <div style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--accent-strong)" }}>
+          Your request was submitted — we'll be in touch soon.
+        </div>
+      )}
+
       {/* Header */}
       <article className="panel rounded-[1.8rem] p-6 sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -70,13 +79,34 @@ export default async function PortalPage() {
               Welcome back, {session.name ?? session.email}.
             </h2>
           </div>
-          {isAdmin && (
+          {isAdmin ? (
             <Link
               href="/portal/admin"
               style={{ fontFamily: "monospace", fontSize: ".75rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", textDecoration: "none", flexShrink: 0 }}
             >
               Admin panel →
             </Link>
+          ) : (
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Link
+                href="/portal/requests/new"
+                style={{ border: "1px solid var(--accent)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
+              >
+                + Submit request
+              </Link>
+              <Link
+                href="/portal/projects"
+                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--muted)", textDecoration: "none" }}
+              >
+                My projects
+              </Link>
+              <Link
+                href="/portal/invoices"
+                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--muted)", textDecoration: "none" }}
+              >
+                My invoices
+              </Link>
+            </div>
           )}
         </div>
       </article>

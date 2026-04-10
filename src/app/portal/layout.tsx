@@ -28,9 +28,19 @@ export default async function PortalLayout({
               </p>
             ) : null}
           </div>
-          <nav style={{ display: "flex", alignItems: "center", gap: "20px", fontSize: ".875rem", color: "var(--muted)" }}>
+          <nav style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: ".875rem", color: "var(--muted)", flexWrap: "wrap" }}>
             <PortalExitLink />
             {session ? <Link href="/portal">Dashboard</Link> : null}
+            {session ? <Link href="/portal/projects">Projects</Link> : null}
+            {session ? <Link href="/portal/invoices">Invoices</Link> : null}
+            {session ? (
+              <Link
+                href="/portal/requests/new"
+                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".825rem", color: "var(--accent)", background: "transparent", textDecoration: "none", fontWeight: 600 }}
+              >
+                + Request
+              </Link>
+            ) : null}
             {session ? <Link href="/portal/profile">Profile</Link> : null}
             {session?.role === "ADMIN" ? (
               <Link href="/portal/admin" style={{ color: "var(--accent)", fontWeight: 600 }}>Admin</Link>
