@@ -11,14 +11,16 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [projectCount, invoiceCount, supportCount, unusedInviteCount] = await Promise.all([
+  const [projectCount, invoiceCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
     prisma.project.count(),
     prisma.invoice.count(),
     prisma.supportItem.count(),
     prisma.invite.count({ where: { usedAt: null } }),
+    prisma.user.count({ where: { role: "CLIENT" } }),
   ]);
 
   const sections = [
+    { label: "Users", href: "/portal/admin/users", count: userCount, description: "Manage client accounts — reset passwords, disable or remove users." },
     { label: "Projects", href: "/portal/admin/projects", count: projectCount, description: "Manage active and completed projects shown in the portal." },
     { label: "Invoices", href: "/portal/admin/invoices", count: invoiceCount, description: "Create and update invoice records for the billing section." },
     { label: "Support items", href: "/portal/admin/support", count: supportCount, description: "Manage the support queue shown on the dashboard." },

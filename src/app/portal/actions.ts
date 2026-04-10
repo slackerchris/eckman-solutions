@@ -37,8 +37,13 @@ export async function loginPortalAction(
 
   if (!user) {
     return {
-      error:
-        "No portal account was found for that email. Create a user first with npm run user:create.",
+      error: "Incorrect email or password.",
+    };
+  }
+
+  if (user.disabled) {
+    return {
+      error: "This account has been disabled. Please contact your administrator.",
     };
   }
 
