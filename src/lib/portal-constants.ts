@@ -12,6 +12,12 @@ export const SERVICE_TYPES = [
 export const PROJECT_STATUSES = [
   "New",
   "Accepted",
+  "Scheduled",
+  "In Progress",
+  "In Review",
+  "Complete",
+  "On Hold",
+  "Cancelled",
 ] as const;
 
 export const INVOICE_STATUSES = [
