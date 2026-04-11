@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const SERVICE_LINKS = [
@@ -51,8 +52,20 @@ export function NavBar() {
     }} className="site-nav-bar">
       <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 0" }}>
 
-        <Link href="/" style={{ fontWeight: 700, fontSize: "1.1rem", letterSpacing: "-.03em", color: "var(--ink)", textDecoration: "none" }}>
-          eckman<span style={{ color: "var(--muted)", fontWeight: 500 }}>.solutions</span>
+        <Link
+          href="/"
+          style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}
+          aria-label="Eckman Solutions home"
+        >
+          <Image src="/brand/eckman-mark.svg" alt="Eckman Solutions" width={30} height={30} priority />
+          <span style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+            <span style={{ fontWeight: 700, fontSize: "1.03rem", letterSpacing: "-.03em", color: "var(--ink)" }}>
+              Eckman
+            </span>
+            <span style={{ fontWeight: 700, fontSize: ".63rem", letterSpacing: ".22em", color: "var(--accent)", textTransform: "uppercase", marginTop: "4px" }}>
+              Solutions
+            </span>
+          </span>
         </Link>
 
         {/* Desktop */}

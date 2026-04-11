@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="Eckman Solutions mark">
+  <rect x="8" y="10" width="104" height="100" rx="14" stroke="#94A3B8" stroke-width="6"/>
+
+  <line x1="22" y1="26" x2="98" y2="26" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>
+  <line x1="22" y1="60" x2="98" y2="60" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>
+  <line x1="22" y1="94" x2="98" y2="94" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>
+
+  <path d="M34 18H84L72 34H22L34 18Z" fill="#0EA5E9" opacity="0.95"/>
+  <path d="M78 52H100L88 68H66L78 52Z" fill="#38BDF8" opacity="0.9"/>
+  <path d="M32 86H70L58 102H20L32 86Z" fill="#94A3B8" opacity="0.92"/>
+
+  <circle cx="22" cy="26" r="7" fill="#CBD5E1"/>
+  <circle cx="98" cy="26" r="7" fill="#0284C7"/>
+  <circle cx="78" cy="60" r="7" fill="#94A3B8"/>
+  <circle cx="22" cy="94" r="7" fill="#CBD5E1"/>
+  <circle cx="98" cy="94" r="7" fill="#94A3B8"/>
+
+  <line x1="22" y1="26" x2="22" y2="94" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>
+  <line x1="98" y1="26" x2="78" y2="60" stroke="#94A3B8" stroke-width="4"/>
+  <line x1="78" y1="60" x2="22" y2="94" stroke="#94A3B8" stroke-width="4"/>
+</svg>

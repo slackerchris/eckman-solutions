@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { logoutPortalAction } from "@/app/portal/actions";
 import { getSession } from "@/lib/auth/session";
@@ -15,18 +16,21 @@ export default async function PortalLayout({
     <div style={{ minHeight: "100vh", background: "var(--paper)" }}>
       <header style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
         <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0" }}>
-          <div>
-            <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
-              Eckman Solutions
-            </p>
-            <h1 style={{ fontSize: "1.1rem", fontWeight: 700, letterSpacing: "-.025em", color: "var(--ink)", marginTop: "2px" }}>
-              Client portal
-            </h1>
-            {session ? (
-              <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>
-                Signed in as {session.name ?? session.email}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Image src="/brand/eckman-mark.svg" alt="Eckman Solutions" width={34} height={34} priority />
+            <div>
+              <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
+                Eckman Solutions
               </p>
-            ) : null}
+              <h1 style={{ fontSize: "1.1rem", fontWeight: 700, letterSpacing: "-.025em", color: "var(--ink)", marginTop: "2px" }}>
+                Client portal
+              </h1>
+              {session ? (
+                <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>
+                  Signed in as {session.name ?? session.email}
+                </p>
+              ) : null}
+            </div>
           </div>
           <nav style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: ".875rem", color: "var(--muted)", flexWrap: "wrap" }}>
             <PortalExitLink />

@@ -32,12 +32,26 @@ export const metadata: Metadata = {
     url: "https://eckman.solutions",
     siteName: "Eckman Solutions",
     type: "website",
+    images: [
+      {
+        url: "/brand/eckman-mark.svg",
+        width: 120,
+        height: 120,
+        alt: "Eckman Solutions mark",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Eckman Solutions",
     description:
       "Digital systems for local businesses: analytics, websites, apps, custom software, and hardware solutions.",
+    images: ["/brand/eckman-mark.svg"],
+  },
+  icons: {
+    icon: "/brand/eckman-mark.svg",
+    shortcut: "/brand/eckman-mark.svg",
+    apple: "/brand/eckman-mark.svg",
   },
   alternates: {
     canonical: "/",
