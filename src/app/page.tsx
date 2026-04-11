@@ -79,7 +79,7 @@ export default function Home() {
               Technology that <em style={{ fontStyle: "italic", color: "var(--accent)" }}>actually works</em> for your business
             </h1>
             <p style={{ marginTop: "18px", fontSize: "1.05rem", color: "var(--muted)", maxWidth: "460px", lineHeight: 1.7 }}>
-              Websites, custom software, web apps, data analytics, and hands-on hardware support — built by someone who actually picks up the phone.
+              Websites, systems, and data solutions for small businesses , without the tech headaches — built by someone who actually picks up the phone.
             </p>
             <div style={{ marginTop: "28px", display: "flex", gap: "14px", flexWrap: "wrap" }}>
               <Link href="/contact" className="btn-primary">
