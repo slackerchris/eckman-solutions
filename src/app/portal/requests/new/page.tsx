@@ -36,7 +36,7 @@ export default async function NewRequestPage({ searchParams }: { searchParams: P
         Use this form to submit content updates, support questions, or any other requests. We'll respond as soon as possible.
       </p>
 
-      <RequestForm projects={projects} defaultProjectId={params.project} />
+      <RequestForm projects={projects} defaultProjectId={params.project} isAdmin={isAdmin} />
     </section>
   );
 }

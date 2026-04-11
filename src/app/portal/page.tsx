@@ -80,12 +80,20 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
             </h2>
           </div>
           {isAdmin ? (
-            <Link
-              href="/portal/admin"
-              style={{ fontFamily: "monospace", fontSize: ".75rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", textDecoration: "none", flexShrink: 0 }}
-            >
-              Admin panel →
-            </Link>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <Link
+                href="/portal/admin/projects/new"
+                style={{ border: "1px solid var(--accent)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
+              >
+                + New project
+              </Link>
+              <Link
+                href="/portal/admin"
+                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--muted)", textDecoration: "none" }}
+              >
+                Admin panel →
+              </Link>
+            </div>
           ) : (
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <Link

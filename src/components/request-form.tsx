@@ -50,9 +50,11 @@ type Project = { id: string; name: string };
 export function RequestForm({
   projects,
   defaultProjectId,
+  isAdmin = false,
 }: {
   projects: Project[];
   defaultProjectId?: string;
+  isAdmin?: boolean;
 }) {
   const [state, action, pending] = useActionState<RequestActionState, FormData>(
     submitRequestAction,
@@ -109,7 +111,17 @@ export function RequestForm({
         </select>
         {projects.length === 0 && (
           <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "6px" }}>
-            No projects are assigned to your account yet. Create/assign a project first, then you can link requests to it.
+            {isAdmin ? (
+              <>
+                No projects yet. Create one from{" "}
+                <a href="/portal/admin/projects/new" style={{ color: "var(--accent)", fontWeight: 600 }}>
+                  Admin → Projects → New project
+                </a>{" "}
+                and then you can link requests to it.
+              </>
+            ) : (
+              "No projects are assigned to your account yet. Ask an admin to assign a project, then you can link requests to it."
+            )}
           </p>
         )}
       </div>
