@@ -15,7 +15,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
-  const [projects, invoices, supportItems] = await Promise.all([
+  const [projects, invoices, workItems] = await Promise.all([
     prisma.project.findMany({
       where: isAdmin ? undefined : { userId: session.userId },
       orderBy: { createdAt: "desc" },
@@ -37,27 +37,57 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     }),
   ]);
 
+  const requestQueueItems = isAdmin
+    ? workItems.filter((item) => !item.projectId)
+    : [];
+  const supportQueueItems = isAdmin
+    ? workItems.filter((item) => Boolean(item.projectId))
+    : workItems;
+
   const activeProjects = projects.filter(
     (p) => p.status.toLowerCase() !== "complete" && p.status.toLowerCase() !== "cancelled",
   );
 
-  const stats = [
-    {
-      label: "Active projects",
-      value: activeProjects.length.toString().padStart(2, "0"),
-      href: isAdmin ? "/portal/admin/projects" : undefined,
-    },
-    {
-      label: "Invoices",
-      value: invoices.length.toString().padStart(2, "0"),
-      href: isAdmin ? "/portal/admin/invoices" : undefined,
-    },
-    {
-      label: "Support items",
-      value: supportItems.length.toString().padStart(2, "0"),
-      href: isAdmin ? "/portal/admin/support" : undefined,
-    },
-  ];
+  const stats = isAdmin
+    ? [
+        {
+          label: "Active projects",
+          value: activeProjects.length.toString().padStart(2, "0"),
+          href: "/portal/admin/projects",
+        },
+        {
+          label: "Invoices",
+          value: invoices.length.toString().padStart(2, "0"),
+          href: "/portal/admin/invoices",
+        },
+        {
+          label: "Request queue",
+          value: requestQueueItems.length.toString().padStart(2, "0"),
+          href: "/portal/admin/requests",
+        },
+        {
+          label: "Support queue",
+          value: supportQueueItems.length.toString().padStart(2, "0"),
+          href: "/portal/admin/support",
+        },
+      ]
+    : [
+        {
+          label: "Active projects",
+          value: activeProjects.length.toString().padStart(2, "0"),
+          href: undefined,
+        },
+        {
+          label: "Invoices",
+          value: invoices.length.toString().padStart(2, "0"),
+          href: undefined,
+        },
+        {
+          label: "Support items",
+          value: supportQueueItems.length.toString().padStart(2, "0"),
+          href: undefined,
+        },
+      ];
 
   return (
     <section className="space-y-8">
@@ -120,7 +150,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </article>
 
       {/* Stat cards */}
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {stats.map((item) => {
           const inner = (
             <>
@@ -256,7 +286,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
             <div className="flex items-center justify-between gap-4 mb-5">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Support queue</p>
-                <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Current requests</h3>
+                <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Project support</h3>
               </div>
               {isAdmin && (
                 <Link href="/portal/admin/support" className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--accent-strong)] no-underline hover:underline shrink-0">
@@ -265,10 +295,10 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               )}
             </div>
             <div className="space-y-3">
-              {supportItems.length === 0 ? (
+              {supportQueueItems.length === 0 ? (
                 <p className="text-sm text-[var(--muted)]">No support items yet.</p>
               ) : (
-                supportItems.map((item) => (
+                supportQueueItems.map((item) => (
                   <article key={item.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-sm font-semibold">{item.title}</p>
@@ -282,6 +312,37 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               )}
             </div>
           </article>
+
+          {isAdmin && (
+            <article className="panel rounded-[1.8rem] p-8 sm:p-10">
+              <div className="flex items-center justify-between gap-4 mb-5">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Request queue</p>
+                  <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">New incoming requests</h3>
+                </div>
+                <Link href="/portal/admin/requests" className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--accent-strong)] no-underline hover:underline shrink-0">
+                  Manage →
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {requestQueueItems.length === 0 ? (
+                  <p className="text-sm text-[var(--muted)]">No new requests yet.</p>
+                ) : (
+                  requestQueueItems.map((item) => (
+                    <article key={item.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-semibold">{item.title}</p>
+                        <span className="shrink-0 rounded-full border border-[var(--line)] px-2 py-0.5 text-xs text-[var(--muted)]">
+                          {item.status ?? "Open"}
+                        </span>
+                      </div>
+                      {item.detail && <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{item.detail}</p>}
+                    </article>
+                  ))
+                )}
+              </div>
+            </article>
+          )}
         </div>
       </section>
     </section>

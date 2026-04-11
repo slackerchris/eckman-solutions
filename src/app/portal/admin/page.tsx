@@ -11,10 +11,11 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [projectCount, invoiceCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
+  const [projectCount, invoiceCount, requestCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
     prisma.project.count(),
     prisma.invoice.count(),
-    prisma.supportItem.count(),
+    prisma.supportItem.count({ where: { projectId: null } }),
+    prisma.supportItem.count({ where: { projectId: { not: null } } }),
     prisma.invite.count({ where: { usedAt: null } }),
     prisma.user.count({ where: { role: "CLIENT" } }),
   ]);
@@ -23,7 +24,8 @@ export default async function AdminPage() {
     { label: "Users", href: "/portal/admin/users", count: userCount, description: "Manage client accounts — reset passwords, disable or remove users." },
     { label: "Projects", href: "/portal/admin/projects", count: projectCount, description: "Manage active and completed projects shown in the portal." },
     { label: "Invoices", href: "/portal/admin/invoices", count: invoiceCount, description: "Create and update invoice records for the billing section." },
-    { label: "Support items", href: "/portal/admin/support", count: supportCount, description: "Manage the support queue shown on the dashboard." },
+    { label: "Request queue", href: "/portal/admin/requests", count: requestCount, description: "Review incoming requests that are not linked to a project yet." },
+    { label: "Support queue", href: "/portal/admin/support", count: supportCount, description: "Manage project-linked support requests shown in the support queue." },
     { label: "Invites", href: "/portal/admin/invites", count: unusedInviteCount, description: "Generate single-use signup links to onboard new clients." },
   ];
 

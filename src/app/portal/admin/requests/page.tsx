@@ -6,14 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { deleteSupportItemAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
-export const metadata: Metadata = { title: "Support Items — Admin" };
+export const metadata: Metadata = { title: "Request Queue — Admin" };
 
-export default async function AdminSupportPage() {
+export default async function AdminRequestsPage() {
   await requireAdmin();
   const items = await prisma.supportItem.findMany({
-    where: { projectId: { not: null } },
+    where: { projectId: null },
     orderBy: { createdAt: "desc" },
-    include: { project: { select: { name: true } } },
   });
 
   return (
@@ -24,20 +23,20 @@ export default async function AdminSupportPage() {
             ← Admin
           </Link>
           <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px" }}>
-            Support queue
+            Request queue
           </h2>
         </div>
         <Link
-          href="/portal/admin/support/new"
+          href="/portal/requests/new"
           className="btn-primary"
           style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
         >
-          + New item
+          + New request
         </Link>
       </div>
 
       {items.length === 0 ? (
-        <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No project-linked support items yet. Add one above.</p>
+        <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No new requests in queue.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {items.map((item) => (
@@ -47,25 +46,25 @@ export default async function AdminSupportPage() {
             >
               <div>
                 <p style={{ fontFamily: "monospace", fontSize: ".68rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", marginBottom: "4px" }}>
-                  {item.category ?? "General"}_
+                  {item.category ?? "General"}
                   <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.status}</span>
                 </p>
                 <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</p>
-                {item.project && (
-                  <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "4px" }}>Project: {item.project.name}</p>
-                )}
                 <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
+                <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "8px" }}>
+                  Submitted {new Date(item.createdAt).toLocaleDateString()}
+                </p>
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
                 <Link
                   href={`/portal/admin/support/${item.id}/edit`}
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}
                 >
-                  Edit
+                  Triage
                 </Link>
                 <ConfirmDeleteButton
                   action={deleteSupportItemAction.bind(null, item.id)}
-                  message="Delete this support item?"
+                  message="Delete this request?"
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
                 />
               </div>
