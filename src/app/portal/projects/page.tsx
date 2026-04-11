@@ -30,21 +30,42 @@ export default async function ClientProjectsPage() {
             {isAdmin ? "All projects" : "Your projects"}
           </h2>
         </div>
-        <Link
-          href="/portal/requests/new"
-          className="btn-primary"
-          style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
-        >
-          + New request
-        </Link>
+        {isAdmin ? (
+          <Link
+            href="/portal/admin/projects/new"
+            className="btn-primary"
+            style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
+          >
+            + New project
+          </Link>
+        ) : (
+          <Link
+            href="/portal/requests/new"
+            className="btn-primary"
+            style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
+          >
+            + New request
+          </Link>
+        )}
       </div>
 
       {projects.length === 0 ? (
         <div style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "40px 32px", textAlign: "center" }}>
-          <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No projects have been assigned yet.</p>
+          <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>
+            {isAdmin ? "No projects yet." : "No projects have been assigned yet."}
+          </p>
           <p style={{ color: "var(--muted)", fontSize: ".875rem", marginTop: "8px" }}>
-            Have a question?{" "}
-            <Link href="/portal/requests/new" style={{ color: "var(--accent)" }}>Submit a request</Link>
+            {isAdmin ? (
+              <>
+                Start here:{" "}
+                <Link href="/portal/admin/projects/new" style={{ color: "var(--accent)" }}>Create a project</Link>
+              </>
+            ) : (
+              <>
+                Have a question?{" "}
+                <Link href="/portal/requests/new" style={{ color: "var(--accent)" }}>Submit a request</Link>
+              </>
+            )}
           </p>
         </div>
       ) : (
