@@ -63,8 +63,6 @@ export function RequestForm({
     defaultProjectId ? "Not sure yet" : "",
   );
 
-  const showProjectPicker = projects.length > 0 || Boolean(defaultProjectId);
-
   return (
     <form action={action} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {state.error && (
@@ -92,30 +90,29 @@ export function RequestForm({
       </div>
 
       {/* Optional project link if this request is for existing work */}
-      {showProjectPicker && (
-        <div>
-          <label htmlFor="projectId" style={labelStyle}>
-            Related project{" "}
-            <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
-          </label>
-          <select
-            id="projectId"
-            name="projectId"
-            style={selectStyle}
-            defaultValue={defaultProjectId ?? ""}
-          >
-            <option value="">— Other / not listed —</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-          {projects.length === 0 && (
-            <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "6px" }}>
-              No projects are assigned to your account yet — we'll still receive your request.
-            </p>
-          )}
-        </div>
-      )}
+      <div>
+        <label htmlFor="projectId" style={labelStyle}>
+          Related project{" "}
+          <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
+        </label>
+        <select
+          id="projectId"
+          name="projectId"
+          style={{ ...selectStyle, opacity: projects.length === 0 ? 0.65 : 1 }}
+          defaultValue={defaultProjectId ?? ""}
+          disabled={projects.length === 0}
+        >
+          <option value="">— Other / not listed —</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        {projects.length === 0 && (
+          <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "6px" }}>
+            No projects are assigned to your account yet. Create/assign a project first, then you can link requests to it.
+          </p>
+        )}
+      </div>
 
       {/* ── Title ── */}
       <div>
