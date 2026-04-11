@@ -32,6 +32,15 @@ const errorStyle: React.CSSProperties = {
   marginTop: "4px",
 };
 
+const serviceOptions = [
+  "Websites",
+  "Web Apps",
+  "Custom Software",
+  "Data Analytics",
+  "Hardware & IT",
+  "Not sure yet",
+] as const;
+
 export function ContactForm() {
   const [state, action, pending] = useActionState(submitContact, initial);
 
@@ -70,6 +79,17 @@ export function ContactForm() {
       <div>
         <label htmlFor="phone" style={labelStyle}>Phone <span style={{ color: "var(--muted)", fontWeight: 400 }}>(optional)</span></label>
         <input id="phone" name="phone" type="tel" autoComplete="tel" style={inputStyle} />
+      </div>
+
+      <div>
+        <label htmlFor="service" style={labelStyle}>Service <span style={{ color: "var(--muted)", fontWeight: 400 }}>(optional)</span></label>
+        <select id="service" name="service" defaultValue="" style={inputStyle}>
+          <option value="">Select a service</option>
+          {serviceOptions.map((service) => (
+            <option key={service} value={service}>{service}</option>
+          ))}
+        </select>
+        {state.fieldErrors?.service && <p style={errorStyle}>{state.fieldErrors.service}</p>}
       </div>
 
       <div>

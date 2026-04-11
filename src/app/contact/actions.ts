@@ -7,6 +7,7 @@ const schema = z.object({
   name:    z.string().min(1, "Name is required").max(100),
   email:   z.string().email("Enter a valid email address"),
   phone:   z.string().max(30).optional(),
+  service: z.string().max(80).optional(),
   message: z.string().min(10, "Please include a brief message").max(5000),
 });
 
@@ -24,6 +25,7 @@ export async function submitContact(
     name:    formData.get("name"),
     email:   formData.get("email"),
     phone:   formData.get("phone"),
+    service: formData.get("service"),
     message: formData.get("message"),
   };
 
@@ -36,7 +38,7 @@ export async function submitContact(
     return { success: false, fieldErrors };
   }
 
-  const { name, email, phone, message } = parsed.data;
+  const { name, email, phone, service, message } = parsed.data;
 
   // Only attempt email if SMTP env vars are configured
   const smtpHost = process.env.SMTP_HOST;
@@ -61,6 +63,7 @@ export async function submitContact(
           `Name:    ${name}`,
           `Email:   ${email}`,
           phone ? `Phone:   ${phone}` : null,
+          service ? `Service: ${service}` : null,
           ``,
           message,
         ].filter(Boolean).join("\n"),
