@@ -10,11 +10,8 @@ export const SERVICE_TYPES = [
 ] as const;
 
 export const PROJECT_STATUSES = [
-  "In progress",
-  "Review",
-  "On hold",
-  "Complete",
-  "Cancelled",
+  "New",
+  "Accepted",
 ] as const;
 
 export const INVOICE_STATUSES = [

@@ -71,7 +71,7 @@ export default async function NewProjectPage() {
         </div>
         <div>
           <label htmlFor="status" style={labelStyle}>Status</label>
-          <select id="status" name="status" required style={selectStyle}>
+          <select id="status" name="status" required defaultValue="New" style={selectStyle}>
             {PROJECT_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}

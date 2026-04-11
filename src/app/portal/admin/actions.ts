@@ -15,7 +15,7 @@ export async function createProjectAction(formData: FormData) {
       data: {
         name: String(formData.get("name") ?? "").trim(),
         type: String(formData.get("type") ?? "").trim(),
-        status: String(formData.get("status") ?? "").trim(),
+        status: String(formData.get("status") ?? "New").trim() || "New",
         notes: String(formData.get("notes") ?? "").trim(),
         url: String(formData.get("url") ?? "").trim(),
         userId,
