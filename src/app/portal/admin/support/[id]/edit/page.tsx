@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { updateSupportItemAction } from "@/app/portal/admin/actions";
-import { SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { REQUEST_PURPOSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Edit Support Item — Admin" };
 
@@ -78,6 +78,17 @@ export default async function EditSupportItemPage({ params }: { params: Promise<
             )}
             {SUPPORT_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="purpose" style={labelStyle}>Purpose</label>
+          <select id="purpose" name="purpose" required defaultValue={item.purpose ?? "Support Ticket"} style={selectStyle}>
+            {!REQUEST_PURPOSES.includes((item.purpose ?? "Support Ticket") as (typeof REQUEST_PURPOSES)[number]) && (
+              <option value={item.purpose ?? "Support Ticket"}>{item.purpose ?? "Support Ticket"}</option>
+            )}
+            {REQUEST_PURPOSES.map((p) => (
+              <option key={p} value={p}>{p}</option>
             ))}
           </select>
         </div>

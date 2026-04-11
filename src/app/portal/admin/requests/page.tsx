@@ -48,6 +48,7 @@ export default async function AdminRequestsPage() {
                 <p style={{ fontFamily: "monospace", fontSize: ".68rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", marginBottom: "4px" }}>
                   {item.category ?? "General"}
                   <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.status}</span>
+                  <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.purpose}</span>
                 </p>
                 <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</p>
                 <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
@@ -63,7 +64,7 @@ export default async function AdminRequestsPage() {
                   Triage
                 </Link>
                 <ConfirmDeleteButton
-                  action={deleteSupportItemAction.bind(null, item.id)}
+                  action={deleteSupportItemAction.bind(null, item.id, "/portal/admin/requests")}
                   message="Delete this request?"
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
                 />

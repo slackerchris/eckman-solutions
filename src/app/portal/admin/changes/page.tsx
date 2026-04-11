@@ -6,14 +6,14 @@ import { prisma } from "@/lib/prisma";
 import { deleteSupportItemAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
-export const metadata: Metadata = { title: "Support Items — Admin" };
+export const metadata: Metadata = { title: "Change Queue — Admin" };
 
-export default async function AdminSupportPage() {
+export default async function AdminChangesPage() {
   await requireAdmin();
   const items = await prisma.supportItem.findMany({
     where: {
       projectId: { not: null },
-      purpose: { not: "Change Request" },
+      purpose: "Change Request",
     },
     orderBy: { createdAt: "desc" },
     include: { project: { select: { name: true } } },
@@ -27,7 +27,7 @@ export default async function AdminSupportPage() {
             ← Admin
           </Link>
           <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px" }}>
-            Support queue
+            Change queue
           </h2>
         </div>
         <Link
@@ -40,7 +40,7 @@ export default async function AdminSupportPage() {
       </div>
 
       {items.length === 0 ? (
-        <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No project-linked support items yet. Add one above.</p>
+        <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No change requests yet.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {items.map((item) => (
@@ -68,8 +68,8 @@ export default async function AdminSupportPage() {
                   Edit
                 </Link>
                 <ConfirmDeleteButton
-                  action={deleteSupportItemAction.bind(null, item.id, "/portal/admin/support")}
-                  message="Delete this support item?"
+                  action={deleteSupportItemAction.bind(null, item.id, "/portal/admin/changes")}
+                  message="Delete this change request?"
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
                 />
               </div>

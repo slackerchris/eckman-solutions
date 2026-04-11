@@ -34,3 +34,10 @@ export const SUPPORT_STATUSES = [
   "Resolved",
   "Closed",
 ] as const;
+
+export const REQUEST_PURPOSES = [
+  "New Project",
+  "Change Request",
+  "Support Ticket",
+  "General Question",
+] as const;

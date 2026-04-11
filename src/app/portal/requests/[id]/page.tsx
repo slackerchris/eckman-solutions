@@ -47,6 +47,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           {item.status ?? "Open"}
         </span>
         <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "4px 12px", fontSize: ".75rem", color: "var(--muted)" }}>
+          {item.purpose ?? "General Question"}
+        </span>
+        <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "4px 12px", fontSize: ".75rem", color: "var(--muted)" }}>
           {item.category ?? "General"}
         </span>
         <span style={{ fontSize: ".75rem", color: "var(--muted)" }}>

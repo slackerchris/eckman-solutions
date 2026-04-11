@@ -40,8 +40,11 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const requestQueueItems = isAdmin
     ? workItems.filter((item) => !item.projectId)
     : [];
+  const changeQueueItems = isAdmin
+    ? workItems.filter((item) => Boolean(item.projectId) && item.purpose === "Change Request")
+    : [];
   const supportQueueItems = isAdmin
-    ? workItems.filter((item) => Boolean(item.projectId))
+    ? workItems.filter((item) => Boolean(item.projectId) && item.purpose !== "Change Request")
     : workItems;
 
   const activeProjects = projects.filter(
@@ -64,6 +67,11 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           label: "Request queue",
           value: requestQueueItems.length.toString().padStart(2, "0"),
           href: "/portal/admin/requests",
+        },
+        {
+          label: "Change queue",
+          value: changeQueueItems.length.toString().padStart(2, "0"),
+          href: "/portal/admin/changes",
         },
         {
           label: "Support queue",
@@ -150,7 +158,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </article>
 
       {/* Stat cards */}
-      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      <section className={`grid gap-5 md:grid-cols-2 ${isAdmin ? "xl:grid-cols-5" : "xl:grid-cols-3"}`}>
         {stats.map((item) => {
           const inner = (
             <>
@@ -315,6 +323,37 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               )}
             </div>
           </article>
+
+          {isAdmin && (
+            <article className="panel rounded-[1.8rem] p-8 sm:p-10">
+              <div className="flex items-center justify-between gap-4 mb-5">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Change queue</p>
+                  <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Project change requests</h3>
+                </div>
+                <Link href="/portal/admin/changes" className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--accent-strong)] no-underline hover:underline shrink-0">
+                  Manage →
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {changeQueueItems.length === 0 ? (
+                  <p className="text-sm text-[var(--muted)]">No change requests yet.</p>
+                ) : (
+                  changeQueueItems.map((item) => (
+                    <article key={item.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-semibold">{item.title}</p>
+                        <span className="shrink-0 rounded-full border border-[var(--line)] px-2 py-0.5 text-xs text-[var(--muted)]">
+                          {item.status ?? "Open"}
+                        </span>
+                      </div>
+                      {item.detail && <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{item.detail}</p>}
+                    </article>
+                  ))
+                )}
+              </div>
+            </article>
+          )}
 
           {isAdmin && (
             <article className="panel rounded-[1.8rem] p-8 sm:p-10">

@@ -118,11 +118,18 @@ export async function deleteInvoiceAction(id: string) {
 export async function createSupportItemAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const returnTo = !projectId
+    ? "/portal/admin/requests"
+    : purpose === "Change Request"
+      ? "/portal/admin/changes"
+      : "/portal/admin/support";
   try {
     await prisma.supportItem.create({
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        purpose,
         status: String(formData.get("status") ?? "Open").trim() || "Open",
         projectId,
       },
@@ -131,18 +138,25 @@ export async function createSupportItemAction(formData: FormData) {
     console.error("createSupportItemAction failed:", e);
     throw e;
   }
-  redirect("/portal/admin/support");
+  redirect(returnTo);
 }
 
 export async function updateSupportItemAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const returnTo = !projectId
+    ? "/portal/admin/requests"
+    : purpose === "Change Request"
+      ? "/portal/admin/changes"
+      : "/portal/admin/support";
   try {
     await prisma.supportItem.update({
       where: { id },
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        purpose,
         status: String(formData.get("status") ?? "Open").trim() || "Open",
         projectId,
       },
@@ -151,16 +165,27 @@ export async function updateSupportItemAction(id: string, formData: FormData) {
     console.error("updateSupportItemAction failed:", e);
     throw e;
   }
-  redirect("/portal/admin/support");
+  redirect(returnTo);
 }
 
-export async function deleteSupportItemAction(id: string) {
+export async function deleteSupportItemAction(id: string, returnTo?: string) {
   await requireAdmin();
+  let resolvedReturnTo = returnTo;
   try {
+    if (!resolvedReturnTo) {
+      const existing = await prisma.supportItem.findUnique({ where: { id } });
+      if (existing) {
+        resolvedReturnTo = !existing.projectId
+          ? "/portal/admin/requests"
+          : existing.purpose === "Change Request"
+            ? "/portal/admin/changes"
+            : "/portal/admin/support";
+      }
+    }
     await prisma.supportItem.delete({ where: { id } });
   } catch (e) {
     console.error("deleteSupportItemAction failed:", e);
     throw e;
   }
-  redirect("/portal/admin/support");
+  redirect(resolvedReturnTo ?? "/portal/admin/support");
 }

@@ -18,6 +18,7 @@ export async function submitRequestAction(
   const title = String(formData.get("title") ?? "").trim();
   const detail = String(formData.get("detail") ?? "").trim();
   const category = String(formData.get("category") ?? "General").trim();
+  const purpose = String(formData.get("purpose") ?? "General Question").trim();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
 
   if (!title) return { error: "Please enter a title for your request." };
@@ -37,6 +38,7 @@ export async function submitRequestAction(
         title,
         detail,
         category,
+        purpose,
         status: "Open",
         projectId,
       },

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { createSupportItemAction } from "@/app/portal/admin/actions";
-import { SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { REQUEST_PURPOSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "New Support Item — Admin" };
 
@@ -70,6 +70,14 @@ export default async function NewSupportItemPage() {
           <select id="status" name="status" required style={selectStyle}>
             {SUPPORT_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="purpose" style={labelStyle}>Purpose</label>
+          <select id="purpose" name="purpose" required defaultValue="Support Ticket" style={selectStyle}>
+            {REQUEST_PURPOSES.map((p) => (
+              <option key={p} value={p}>{p}</option>
             ))}
           </select>
         </div>

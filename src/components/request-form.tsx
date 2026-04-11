@@ -45,6 +45,13 @@ const CATEGORIES = [
   { value: "Not sure yet",    label: "Not sure yet" },
 ] as const;
 
+const PURPOSES = [
+  { value: "New Project",      label: "New project" },
+  { value: "Change Request",   label: "Change request (add to an existing project)" },
+  { value: "Support Ticket",   label: "Support ticket (fix/help on existing project)" },
+  { value: "General Question", label: "General question" },
+] as const;
+
 type Project = { id: string; name: string };
 
 export function RequestForm({
@@ -63,6 +70,9 @@ export function RequestForm({
 
   const [category, setCategory] = useState<string>(
     defaultProjectId ? "Not sure yet" : "",
+  );
+  const [purpose, setPurpose] = useState<string>(
+    defaultProjectId ? "Change Request" : "",
   );
 
   return (
@@ -87,6 +97,24 @@ export function RequestForm({
           <option value="" disabled>— Select a request type —</option>
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* ── Request purpose ── */}
+      <div>
+        <label htmlFor="purpose" style={labelStyle}>Request purpose</label>
+        <select
+          id="purpose"
+          name="purpose"
+          required
+          style={selectStyle}
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
+        >
+          <option value="" disabled>— Select purpose —</option>
+          {PURPOSES.map((p) => (
+            <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </select>
       </div>
@@ -168,9 +196,9 @@ export function RequestForm({
       <div style={{ paddingTop: "4px" }}>
         <button
           type="submit"
-          disabled={pending || !category}
+          disabled={pending || !category || !purpose}
           className="btn-primary"
-          style={{ borderRadius: "999px", padding: "10px 28px", fontSize: ".875rem", opacity: (pending || !category) ? 0.5 : 1, cursor: !category ? "not-allowed" : "pointer" }}
+          style={{ borderRadius: "999px", padding: "10px 28px", fontSize: ".875rem", opacity: (pending || !category || !purpose) ? 0.5 : 1, cursor: (!category || !purpose) ? "not-allowed" : "pointer" }}
         >
           {pending ? "Submitting…" : "Submit request"}
         </button>

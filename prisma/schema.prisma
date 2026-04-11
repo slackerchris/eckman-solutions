@@ -57,6 +57,7 @@ model SupportItem {
   title     String
   detail    String
   category  String   @default("General")
+  purpose   String   @default("Support Ticket")
   status    String   @default("Open")
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id])
