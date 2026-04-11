@@ -37,13 +37,12 @@ const labelStyle = {
 };
 
 const CATEGORIES = [
-  { value: "New website",       label: "New website" },
-  { value: "New web app",       label: "New web app" },
-  { value: "Custom software",   label: "Custom software" },
-  { value: "Data analytics",    label: "Data analytics" },
-  { value: "Hardware / IT",     label: "Hardware & IT support" },
-  { value: "Support request",   label: "Support / update (existing project)" },
-  { value: "Other",             label: "Other" },
+  { value: "Websites",        label: "Websites" },
+  { value: "Web Apps",        label: "Web Apps" },
+  { value: "Custom Software", label: "Custom Software" },
+  { value: "Data Analytics",  label: "Data Analytics" },
+  { value: "Hardware & IT",   label: "Hardware & IT" },
+  { value: "Not sure yet",    label: "Not sure yet" },
 ] as const;
 
 type Project = { id: string; name: string };
@@ -61,10 +60,10 @@ export function RequestForm({
   );
 
   const [category, setCategory] = useState<string>(
-    defaultProjectId ? "Support request" : "",
+    defaultProjectId ? "Not sure yet" : "",
   );
 
-  const isSupport = category === "Support request";
+  const showProjectPicker = projects.length > 0 || Boolean(defaultProjectId);
 
   return (
     <form action={action} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -92,11 +91,11 @@ export function RequestForm({
         </select>
       </div>
 
-      {/* ── Existing project picker — only shown for Support requests ── */}
-      {isSupport && (
+      {/* Optional project link if this request is for existing work */}
+      {showProjectPicker && (
         <div>
           <label htmlFor="projectId" style={labelStyle}>
-            Which project?{" "}
+            Related project{" "}
             <span style={{ fontWeight: 400, opacity: 0.6 }}>(optional)</span>
           </label>
           <select
@@ -127,12 +126,11 @@ export function RequestForm({
           required
           style={inputStyle}
           placeholder={
-            category === "New website"     ? "e.g. New website for my business" :
-            category === "New web app"     ? "e.g. Customer booking system" :
-            category === "Custom software" ? "e.g. Inventory management tool" :
-            category === "Data analytics"  ? "e.g. Sales dashboard for my Shopify store" :
-            category === "Hardware / IT"   ? "e.g. Office network setup" :
-            category === "Support request" ? "e.g. Update homepage hero text" :
+            category === "Websites"        ? "e.g. New website for my business" :
+            category === "Web Apps"        ? "e.g. Customer booking system" :
+            category === "Custom Software" ? "e.g. Inventory management tool" :
+            category === "Data Analytics"  ? "e.g. Sales dashboard for my Shopify store" :
+            category === "Hardware & IT"   ? "e.g. Office network setup" :
                                              "Brief summary of your request"
           }
         />
@@ -148,12 +146,11 @@ export function RequestForm({
           rows={5}
           style={{ ...inputStyle, resize: "vertical" }}
           placeholder={
-            category === "New website"     ? "Tell us about your business, goals, and any examples you like…" :
-            category === "New web app"     ? "Describe the problem you're trying to solve and key features needed…" :
-            category === "Custom software" ? "Describe the workflow or process you want to automate or improve…" :
-            category === "Data analytics"  ? "What data do you have and what decisions do you want it to help you make…" :
-            category === "Hardware / IT"   ? "Describe the hardware, network, or IT issue — location and any error messages help…" :
-            category === "Support request" ? "Describe what needs changing or fixing in as much detail as possible…" :
+            category === "Websites"        ? "Tell us about your business, goals, and any examples you like…" :
+            category === "Web Apps"        ? "Describe the problem you're trying to solve and key features needed…" :
+            category === "Custom Software" ? "Describe the workflow or process you want to automate or improve…" :
+            category === "Data Analytics"  ? "What data do you have and what decisions do you want it to help you make…" :
+            category === "Hardware & IT"   ? "Describe the hardware, network, or IT issue — location and any error messages help…" :
                                              "Describe what you need in as much detail as possible…"
           }
         />
