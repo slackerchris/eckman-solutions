@@ -151,9 +151,12 @@ export default async function ClientProjectsPage() {
                           <p style={{ fontSize: ".875rem", fontWeight: 600, color: "var(--ink)" }}>{req.title}</p>
                           {req.detail && <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px", lineHeight: 1.5 }}>{req.detail}</p>}
                         </div>
-                        <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "2px 10px", fontSize: ".75rem", color: "var(--muted)", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                        <Link
+                          href={`/portal/requests/${req.id}`}
+                          style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "2px 10px", fontSize: ".75rem", color: "var(--muted)", whiteSpace: "nowrap", flexShrink: 0, textDecoration: "none" }}
+                        >
                           {req.status ?? "Open"}
-                        </span>
+                        </Link>
                       </div>
                     ))}
                   </div>

@@ -233,9 +233,12 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                       {project.supportItems.map((req) => (
                         <div key={req.id} className="flex items-start justify-between gap-3 rounded-[0.75rem] border border-[var(--line)] p-3">
                           <p className="text-sm font-medium">{req.title}</p>
-                          <span className="shrink-0 rounded-full border border-[var(--line)] px-2 py-0.5 text-xs text-[var(--muted)]">
+                          <Link
+                            href={`/portal/requests/${req.id}`}
+                            className="shrink-0 rounded-full border border-[var(--line)] px-2 py-0.5 text-xs text-[var(--muted)] no-underline hover:underline"
+                          >
                             {req.status ?? "Open"}
-                          </span>
+                          </Link>
                         </div>
                       ))}
                     </div>
