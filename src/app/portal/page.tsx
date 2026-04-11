@@ -60,7 +60,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   ];
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       {/* Success banner */}
       {submitted && (
         <div style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--accent-strong)" }}>
@@ -69,7 +69,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       )}
 
       {/* Header */}
-      <article className="panel rounded-[1.8rem] p-6 sm:p-8">
+      <article className="panel rounded-[1.8rem] p-8 sm:p-10">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">
@@ -112,24 +112,24 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </article>
 
       {/* Stat cards */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {stats.map((item) => {
           const inner = (
             <>
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">{item.label}</p>
-              <p className="mt-4 text-2xl font-semibold tracking-[-0.04em]">{item.value}</p>
+              <p className="mt-5 text-2xl font-semibold tracking-[-0.04em]">{item.value}</p>
             </>
           );
           return item.href ? (
             <Link
               key={item.label}
               href={item.href}
-              className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card)] p-6 sm:p-7 block no-underline hover:border-[var(--accent-strong)] transition-colors"
+              className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card)] p-7 sm:p-8 block no-underline hover:border-[var(--accent-strong)] transition-colors"
             >
               {inner}
             </Link>
           ) : (
-            <article key={item.label} className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card)] p-6 sm:p-7">
+            <article key={item.label} className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--card)] p-7 sm:p-8">
               {inner}
             </article>
           );
@@ -137,18 +137,18 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </section>
 
       {/* Main content */}
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
 
         {/* Projects */}
-        <article className="panel rounded-[1.8rem] p-6 sm:p-8">
-          <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
+        <article className="panel rounded-[1.8rem] p-8 sm:p-10">
+          <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-5">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Active work</p>
               <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Current projects</h3>
             </div>
             <span className="status-dot" aria-hidden="true" />
           </div>
-          <div className="mt-5 space-y-4">
+          <div className="mt-6 space-y-4">
             {projects.length === 0 ? (
               <p className="text-sm text-[var(--muted)]">
                 {isAdmin ? "No projects yet." : "No projects assigned to you yet."}
@@ -210,8 +210,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
 
         {/* Billing + Support */}
         <div className="space-y-6">
-          <article className="panel rounded-[1.8rem] p-6 sm:p-8">
-            <div className="flex items-center justify-between gap-4 mb-4">
+          <article className="panel rounded-[1.8rem] p-8 sm:p-10">
+            <div className="flex items-center justify-between gap-4 mb-5">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Billing</p>
                 <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Invoice summary</h3>
@@ -227,7 +227,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <p className="text-sm text-[var(--muted)]">No invoices yet.</p>
               ) : (
                 invoices.map((invoice) => (
-                  <article key={invoice.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-4">
+                  <article key={invoice.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold">{invoice.label}</p>
@@ -244,8 +244,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
             </div>
           </article>
 
-          <article className="panel rounded-[1.8rem] p-6 sm:p-8">
-            <div className="flex items-center justify-between gap-4 mb-4">
+          <article className="panel rounded-[1.8rem] p-8 sm:p-10">
+            <div className="flex items-center justify-between gap-4 mb-5">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--accent-strong)]">Support queue</p>
                 <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Current requests</h3>
@@ -261,7 +261,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <p className="text-sm text-[var(--muted)]">No support items yet.</p>
               ) : (
                 supportItems.map((item) => (
-                  <article key={item.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-4">
+                  <article key={item.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-sm font-semibold">{item.title}</p>
                       <span className="shrink-0 rounded-full border border-[var(--line)] px-2 py-0.5 text-xs text-[var(--muted)]">
