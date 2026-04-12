@@ -9,7 +9,7 @@ touch /app/data/.write-test && rm /app/data/.write-test || {
 }
 
 echo "Applying database schema..."
-npx prisma db push
+npx prisma db push --accept-data-loss
 
 if [ "${BOOTSTRAP_ADMIN:-false}" = "true" ]; then
   echo "Bootstrapping portal admin..."
