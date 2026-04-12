@@ -6,6 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatCents, parseCurrencyToCents, parseLineItemsText } from "@/lib/quotes";
 
+function getActionErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
+
 function parsePercentage(input: string): number {
   const cleaned = input.replace(/[%,\s]/g, "").trim();
   if (!cleaned) return 0;
@@ -60,30 +67,35 @@ function parseQuoteForm(formData: FormData) {
 export async function createQuoteAction(formData: FormData) {
   await requireAdmin();
 
-  const parsed = parseQuoteForm(formData);
+  try {
+    const parsed = parseQuoteForm(formData);
 
-  await prisma.quote.create({
-    data: {
-      label: parsed.label,
-      status: parsed.status,
-      notes: parsed.notes,
-      userId: parsed.userId,
-      projectId: parsed.projectId,
-      subtotalCents: parsed.subtotalCents,
-      discountCents: parsed.discountCents,
-      taxCents: parsed.taxCents,
-      totalCents: parsed.totalCents,
-      validUntil: parsed.validUntil,
-      lineItems: {
-        create: parsed.lineItems.map((item, index) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unitPriceCents: item.unitPriceCents,
-          position: index,
-        })),
+    await prisma.quote.create({
+      data: {
+        label: parsed.label,
+        status: parsed.status,
+        notes: parsed.notes,
+        userId: parsed.userId,
+        projectId: parsed.projectId,
+        subtotalCents: parsed.subtotalCents,
+        discountCents: parsed.discountCents,
+        taxCents: parsed.taxCents,
+        totalCents: parsed.totalCents,
+        validUntil: parsed.validUntil,
+        lineItems: {
+          create: parsed.lineItems.map((item, index) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unitPriceCents: item.unitPriceCents,
+            position: index,
+          })),
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    const message = getActionErrorMessage(error, "Failed to create quote.");
+    redirect(`/portal/admin/quotes/new?error=${encodeURIComponent(message)}`);
+  }
 
   redirect("/portal/admin/quotes");
 }
@@ -91,32 +103,37 @@ export async function createQuoteAction(formData: FormData) {
 export async function updateQuoteAction(id: string, formData: FormData) {
   await requireAdmin();
 
-  const parsed = parseQuoteForm(formData);
+  try {
+    const parsed = parseQuoteForm(formData);
 
-  await prisma.quote.update({
-    where: { id },
-    data: {
-      label: parsed.label,
-      status: parsed.status,
-      notes: parsed.notes,
-      userId: parsed.userId,
-      projectId: parsed.projectId,
-      subtotalCents: parsed.subtotalCents,
-      discountCents: parsed.discountCents,
-      taxCents: parsed.taxCents,
-      totalCents: parsed.totalCents,
-      validUntil: parsed.validUntil,
-      lineItems: {
-        deleteMany: {},
-        create: parsed.lineItems.map((item, index) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unitPriceCents: item.unitPriceCents,
-          position: index,
-        })),
+    await prisma.quote.update({
+      where: { id },
+      data: {
+        label: parsed.label,
+        status: parsed.status,
+        notes: parsed.notes,
+        userId: parsed.userId,
+        projectId: parsed.projectId,
+        subtotalCents: parsed.subtotalCents,
+        discountCents: parsed.discountCents,
+        taxCents: parsed.taxCents,
+        totalCents: parsed.totalCents,
+        validUntil: parsed.validUntil,
+        lineItems: {
+          deleteMany: {},
+          create: parsed.lineItems.map((item, index) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unitPriceCents: item.unitPriceCents,
+            position: index,
+          })),
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    const message = getActionErrorMessage(error, "Failed to update quote.");
+    redirect(`/portal/admin/quotes/${id}/edit?error=${encodeURIComponent(message)}`);
+  }
 
   redirect("/portal/admin/quotes");
 }

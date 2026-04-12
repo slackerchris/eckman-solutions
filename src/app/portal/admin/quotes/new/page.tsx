@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { QUOTE_STATUSES } from "@/lib/portal-constants";
 import { createQuoteAction } from "@/app/portal/admin/quotes/actions";
+import { QuoteLineItemsField } from "@/components/quote-line-items-field";
 
 export const metadata: Metadata = { title: "New Quote — Admin" };
 
@@ -40,8 +41,14 @@ const labelStyle = {
   letterSpacing: ".08em",
 };
 
-export default async function NewQuotePage() {
+export default async function NewQuotePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   await requireAdmin();
+  const params = await searchParams;
+  const error = params.error;
 
   const [clients, projects] = await Promise.all([
     prisma.user.findMany({ where: { role: "CLIENT" }, orderBy: { name: "asc" }, select: { id: true, name: true, email: true } }),
@@ -56,6 +63,22 @@ export default async function NewQuotePage() {
       <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px", marginBottom: "28px" }}>
         New quote
       </h2>
+
+      {error ? (
+        <p
+          style={{
+            color: "#c0392b",
+            fontSize: ".875rem",
+            background: "rgba(192,57,43,.08)",
+            border: "1px solid rgba(192,57,43,.2)",
+            borderRadius: ".75rem",
+            padding: "12px 16px",
+            marginBottom: "16px",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
 
       <form action={createQuoteAction} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div>
@@ -99,20 +122,7 @@ export default async function NewQuotePage() {
           </div>
         </div>
 
-        <div>
-          <label htmlFor="lineItems" style={labelStyle}>Line items</label>
-          <textarea
-            id="lineItems"
-            name="lineItems"
-            required
-            rows={8}
-            style={{ ...inputStyle, resize: "vertical", fontFamily: "monospace", fontSize: ".9rem" }}
-            placeholder={`Design and planning | 1 | 850.00\nWebsite implementation | 1 | 2400.00\nAnalytics dashboard setup | 1 | 600.00`}
-          />
-          <p style={{ marginTop: "6px", fontSize: ".78rem", color: "var(--muted)" }}>
-            One item per line: Description | Qty | Unit price
-          </p>
-        </div>
+        <QuoteLineItemsField name="lineItems" />
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { lineItemsToText } from "@/lib/quotes";
 import { QUOTE_STATUSES } from "@/lib/portal-constants";
 import { updateQuoteAction } from "@/app/portal/admin/quotes/actions";
+import { QuoteLineItemsField } from "@/components/quote-line-items-field";
 
 export const metadata: Metadata = { title: "Edit Quote — Admin" };
 
@@ -42,9 +43,17 @@ const labelStyle = {
   letterSpacing: ".08em",
 };
 
-export default async function EditQuotePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditQuotePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   await requireAdmin();
   const { id } = await params;
+  const query = await searchParams;
+  const error = query.error;
 
   const [quote, clients, projects] = await Promise.all([
     prisma.quote.findUnique({
@@ -71,6 +80,22 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
       <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px", marginBottom: "28px" }}>
         Edit quote
       </h2>
+
+      {error ? (
+        <p
+          style={{
+            color: "#c0392b",
+            fontSize: ".875rem",
+            background: "rgba(192,57,43,.08)",
+            border: "1px solid rgba(192,57,43,.2)",
+            borderRadius: ".75rem",
+            padding: "12px 16px",
+            marginBottom: "16px",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
 
       <form action={action} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div>
@@ -123,20 +148,7 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        <div>
-          <label htmlFor="lineItems" style={labelStyle}>Line items</label>
-          <textarea
-            id="lineItems"
-            name="lineItems"
-            required
-            rows={8}
-            defaultValue={lineItemsToText(quote.lineItems)}
-            style={{ ...inputStyle, resize: "vertical", fontFamily: "monospace", fontSize: ".9rem" }}
-          />
-          <p style={{ marginTop: "6px", fontSize: ".78rem", color: "var(--muted)" }}>
-            One item per line: Description | Qty | Unit price
-          </p>
-        </div>
+        <QuoteLineItemsField name="lineItems" initialText={lineItemsToText(quote.lineItems)} />
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
