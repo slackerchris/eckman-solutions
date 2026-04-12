@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 export default async function PortalPage({ searchParams }: { searchParams: Promise<{ submitted?: string }> }) {
   const params = await searchParams;
   const submitted = params.submitted === "1";
+  const paymentBaseUrl = process.env.NEXT_PUBLIC_CLIENT_PAYMENT_URL?.trim();
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
@@ -98,17 +99,17 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         {
           label: "Active projects",
           value: activeProjects.length.toString().padStart(2, "0"),
-          href: undefined,
+          href: "/portal/projects",
         },
         {
           label: "Invoices",
           value: invoices.length.toString().padStart(2, "0"),
-          href: undefined,
+          href: "/portal/invoices",
         },
         {
           label: "Support items",
           value: supportQueueItems.length.toString().padStart(2, "0"),
-          href: undefined,
+          href: "/portal/requests/new",
         },
       ];
 
@@ -315,6 +316,36 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                       <p className="text-sm font-semibold shrink-0">{invoice.amount}</p>
                     </div>
                     <p className="mt-2 text-sm text-[var(--accent-strong)]">{invoice.status}</p>
+
+                    {!isAdmin ? (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/portal/invoices/${invoice.id}`}
+                          className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] no-underline hover:underline"
+                        >
+                          Open invoice
+                        </Link>
+                        {["sent", "overdue"].includes(invoice.status.toLowerCase()) ? (
+                          paymentBaseUrl ? (
+                            <a
+                              href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(invoice.id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] no-underline hover:underline"
+                            >
+                              Pay now
+                            </a>
+                          ) : (
+                            <a
+                              href="#"
+                              className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] no-underline hover:underline"
+                            >
+                              Pay now
+                            </a>
+                          )
+                        ) : null}
+                      </div>
+                    ) : null}
                   </article>
                 ))
               )}
@@ -346,6 +377,16 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                       </span>
                     </div>
                     {item.detail && <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{item.detail}</p>}
+                    {!isAdmin ? (
+                      <div className="mt-3">
+                        <Link
+                          href={`/portal/requests/${item.id}`}
+                          className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] no-underline hover:underline"
+                        >
+                          View request
+                        </Link>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               )}
