@@ -23,6 +23,8 @@ export async function acceptQuoteAction(id: string) {
     redirect("/portal/admin/quotes");
   }
 
+  let successRedirect = `/portal/quotes/${id}?message=${encodeURIComponent("Quote accepted.")}`;
+
   try {
     const quote = await prisma.quote.findUnique({
       where: { id },
@@ -64,19 +66,21 @@ export async function acceptQuoteAction(id: string) {
         }),
       ]);
 
-      redirect(`/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Draft invoice created for admin review.")}`);
-    }
+      successRedirect = `/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Draft invoice created for admin review.")}`;
+    } else {
+      if (quote.status !== "Accepted") {
+        await prisma.quote.update({
+          where: { id: quote.id },
+          data: { status: "Accepted" },
+        });
+      }
 
-    if (quote.status !== "Accepted") {
-      await prisma.quote.update({
-        where: { id: quote.id },
-        data: { status: "Accepted" },
-      });
+      successRedirect = `/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Existing invoice is already linked.")}`;
     }
-
-    redirect(`/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Existing invoice is already linked.")}`);
   } catch (error) {
     const message = getActionErrorMessage(error, "Failed to accept quote.");
     redirect(`/portal/quotes/${id}?error=${encodeURIComponent(message)}`);
   }
+
+  redirect(successRedirect);
 }
