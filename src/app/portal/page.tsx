@@ -4,6 +4,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { getRequestPurposeDefinition } from "@/lib/portal-constants";
+import { DismissibleNotice } from "@/components/dismissible-notice";
+import { buildClientPaymentUrl } from "@/lib/client-payment";
 
 export const metadata: Metadata = {
   title: "Client Portal",
@@ -30,6 +32,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       where: isAdmin
         ? undefined
         : {
+            status: { notIn: ["Draft", "draft"] },
             OR: [
               { project: { userId: session.userId } },
               { quote: { userId: session.userId } },
@@ -148,13 +151,20 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     <section className="space-y-8">
       {/* Success banner */}
       {submitted && (
-        <div style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--accent-strong)" }}>
+        <DismissibleNotice
+          storageKey="submitted-success"
+          persist={false}
+          style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--accent-strong)" }}
+        >
           Your request was submitted — we&apos;ll be in touch soon.
-        </div>
+        </DismissibleNotice>
       )}
 
       {!isAdmin && (invoicesAwaitingPayment > 0 || invoicesAwaitingAdmin > 0) && (
-        <div style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}>
+        <DismissibleNotice
+          storageKey={invoicesAwaitingPayment > 0 ? `invoice-payment-${invoicesAwaitingPayment}` : `invoice-draft-${invoicesAwaitingAdmin}`}
+          style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}
+        >
           <p style={{ margin: 0 }}>
             {invoicesAwaitingPayment > 0
               ? `You have ${invoicesAwaitingPayment} invoice${invoicesAwaitingPayment !== 1 ? "s" : ""} ready for payment.`
@@ -163,18 +173,21 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               View invoices
             </Link>
           </p>
-        </div>
+        </DismissibleNotice>
       )}
 
       {!isAdmin && quotesAwaitingApproval > 0 && (
-        <div style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}>
+        <DismissibleNotice
+          storageKey={`quotes-awaiting-${quotesAwaitingApproval}`}
+          style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}
+        >
           <p style={{ margin: 0 }}>
             You have {quotesAwaitingApproval} quote{quotesAwaitingApproval !== 1 ? "s" : ""} awaiting approval. {" "}
             <Link href="/portal/quotes" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "none" }}>
               Review quotes
             </Link>
           </p>
-        </div>
+        </DismissibleNotice>
       )}
 
       {/* Header */}
@@ -352,7 +365,17 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               {invoices.length === 0 ? (
                 <p className="text-sm text-[var(--muted)]">No invoices yet.</p>
               ) : (
-                invoices.map((invoice) => (
+                invoices.map((invoice) => {
+                  const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
+                    invoiceId: invoice.id,
+                    amount: invoice.amount,
+                    status: invoice.status,
+                    label: invoice.label,
+                    workstream: invoice.workstream,
+                    projectName: invoice.project?.name,
+                  });
+
+                  return (
                   <article key={invoice.id} className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-strong)] p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -374,9 +397,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                           Open invoice
                         </Link>
                         {["sent", "overdue"].includes(invoice.status.toLowerCase()) ? (
-                          paymentBaseUrl ? (
+                          payUrl ? (
                             <a
-                              href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(invoice.id)}`}
+                              href={payUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--muted)] no-underline hover:underline"
@@ -395,7 +418,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                       </div>
                     ) : null}
                   </article>
-                ))
+                  );
+                })
               )}
             </div>
           </article>

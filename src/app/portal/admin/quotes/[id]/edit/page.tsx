@@ -127,7 +127,14 @@ export default async function EditQuotePage({
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
             <label htmlFor="discount" style={labelStyle}>Discount (optional)</label>
-            <input id="discount" name="discount" defaultValue={(quote.discountCents / 100).toFixed(2)} style={inputStyle} />
+            <input id="discount" name="discount" defaultValue={(quote.discountCents / 100).toFixed(2)} style={inputStyle} placeholder="0.00 or 10" />
+          </div>
+          <div>
+            <label htmlFor="discountType" style={labelStyle}>Discount type</label>
+            <select id="discountType" name="discountType" defaultValue="AMOUNT" style={selectStyle}>
+              <option value="AMOUNT">Dollar amount ($)</option>
+              <option value="PERCENT">Percentage (%)</option>
+            </select>
           </div>
           <div>
             <label htmlFor="tax" style={labelStyle}>Tax % (optional)</label>

@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { formatCents } from "@/lib/quotes";
-import { acceptQuoteAction } from "@/app/portal/quotes/actions";
+import { acceptQuoteAction, declineQuoteAction } from "@/app/portal/quotes/actions";
 
 export const metadata: Metadata = { title: "Quote Details — Portal" };
 
@@ -42,7 +42,7 @@ export default async function ClientQuoteDetailPage({
     notFound();
   }
 
-  const canAccept = !["Accepted", "Converted", "Rejected", "Expired"].includes(quote.status);
+  const canRespond = !["Accepted", "Converted", "Rejected", "Expired"].includes(quote.status);
 
   return (
     <section style={{ maxWidth: "860px" }}>
@@ -79,12 +79,22 @@ export default async function ClientQuoteDetailPage({
         </p>
       ) : null}
 
-      {canAccept ? (
-        <form action={acceptQuoteAction.bind(null, quote.id)} style={{ marginBottom: "16px" }}>
-          <button type="submit" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem" }}>
-            Accept quote
-          </button>
-        </form>
+      {canRespond ? (
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "16px" }}>
+          <form action={acceptQuoteAction.bind(null, quote.id)}>
+            <button type="submit" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem" }}>
+              Accept quote
+            </button>
+          </form>
+          <form action={declineQuoteAction.bind(null, quote.id)}>
+            <button
+              type="submit"
+              style={{ border: "1px solid rgba(239, 68, 68, .4)", background: "rgba(239, 68, 68, .06)", color: "#b91c1c", borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", cursor: "pointer" }}
+            >
+              Decline quote
+            </button>
+          </form>
+        </div>
       ) : null}
 
       <article style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 22px" }}>

@@ -13,7 +13,7 @@ function getActionErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-function canClientAcceptQuoteStatus(status: string): boolean {
+function canClientRespondQuoteStatus(status: string): boolean {
   return !["Accepted", "Converted", "Rejected", "Expired"].includes(status);
 }
 
@@ -44,7 +44,7 @@ export async function acceptQuoteAction(id: string) {
       throw new Error("You do not have access to this quote.");
     }
 
-    if (!canClientAcceptQuoteStatus(quote.status)) {
+    if (!canClientRespondQuoteStatus(quote.status)) {
       throw new Error("This quote can no longer be accepted.");
     }
 
@@ -96,4 +96,44 @@ export async function acceptQuoteAction(id: string) {
   }
 
   redirect(successRedirect);
+}
+
+export async function declineQuoteAction(id: string) {
+  const session = await requireSession();
+  if (session.role !== "CLIENT") {
+    redirect("/portal/admin/quotes");
+  }
+
+  try {
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        project: { select: { userId: true } },
+      },
+    });
+
+    if (!quote) {
+      throw new Error("Quote not found.");
+    }
+
+    const ownsByUser = quote.userId === session.userId;
+    const ownsByProject = Boolean(quote.project && quote.project.userId === session.userId);
+    if (!ownsByUser && !ownsByProject) {
+      throw new Error("You do not have access to this quote.");
+    }
+
+    if (!canClientRespondQuoteStatus(quote.status)) {
+      throw new Error("This quote can no longer be declined.");
+    }
+
+    await prisma.quote.update({
+      where: { id: quote.id },
+      data: { status: "Rejected" },
+    });
+  } catch (error) {
+    const message = getActionErrorMessage(error, "Failed to decline quote.");
+    redirect(`/portal/quotes/${id}?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect(`/portal/quotes/${id}?message=${encodeURIComponent("Quote declined.")}`);
 }

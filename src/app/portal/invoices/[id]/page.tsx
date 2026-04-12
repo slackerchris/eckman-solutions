@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { requireSession } from "@/lib/auth/session";
+import { buildClientPaymentUrl } from "@/lib/client-payment";
 import { prisma } from "@/lib/prisma";
 import { formatCents } from "@/lib/quotes";
 
@@ -39,6 +40,10 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
     notFound();
   }
 
+  if (invoice.status.toLowerCase() === "draft") {
+    notFound();
+  }
+
   const ownsByProject = Boolean(invoice.project && invoice.project.userId === session.userId);
   const ownsByQuote = Boolean(invoice.quote && invoice.quote.userId === session.userId);
   if (!ownsByProject && !ownsByQuote) {
@@ -47,6 +52,14 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
 
   const lineSubtotal = invoice.lineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
   const statusLower = invoice.status.toLowerCase();
+  const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
+    invoiceId: invoice.id,
+    amount: invoice.amount,
+    status: invoice.status,
+    label: invoice.label,
+    workstream: invoice.workstream,
+    projectName: invoice.project?.name,
+  });
 
   return (
     <section style={{ maxWidth: "860px" }}>
@@ -75,9 +88,9 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
       </div>
 
       {["sent", "overdue"].includes(statusLower) ? (
-        paymentBaseUrl ? (
+        payUrl ? (
           <a
-            href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(invoice.id)}`}
+            href={payUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"

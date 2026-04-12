@@ -101,7 +101,14 @@ export default async function NewQuotePage({
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
             <label htmlFor="discount" style={labelStyle}>Discount (optional)</label>
-            <input id="discount" name="discount" style={inputStyle} defaultValue="0" placeholder="0.00" />
+            <input id="discount" name="discount" style={inputStyle} defaultValue="0" placeholder="0.00 or 10" />
+          </div>
+          <div>
+            <label htmlFor="discountType" style={labelStyle}>Discount type</label>
+            <select id="discountType" name="discountType" defaultValue="AMOUNT" style={selectStyle}>
+              <option value="AMOUNT">Dollar amount ($)</option>
+              <option value="PERCENT">Percentage (%)</option>
+            </select>
           </div>
           <div>
             <label htmlFor="tax" style={labelStyle}>Tax % (optional)</label>

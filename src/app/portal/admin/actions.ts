@@ -4,11 +4,45 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
-import { getRequestPurposeDefinition } from "@/lib/portal-constants";
+import { getRequestPurposeDefinition, INVOICE_STATUSES } from "@/lib/portal-constants";
+import { formatCents, parseCurrencyToCents } from "@/lib/quotes";
 
 function normalizeSupportCategory(input: string | null | undefined): string {
   const category = (input ?? "").trim();
   return category || "General";
+}
+
+function parsePercentage(input: string): number {
+  const cleaned = input.replace(/[%,\s]/g, "").trim();
+  if (!cleaned) return 0;
+
+  const value = Number(cleaned);
+  if (!Number.isFinite(value) || value < 0 || value > 100) {
+    throw new Error(`Invalid discount percentage: ${input}`);
+  }
+
+  return value;
+}
+
+function computeDiscountedAmount(
+  amountInput: string,
+  discountInput: string,
+  discountTypeInput: string,
+): string {
+  const amountCents = parseCurrencyToCents(amountInput);
+  const hasDiscount = discountInput.trim().length > 0;
+
+  if (!hasDiscount) {
+    return formatCents(amountCents);
+  }
+
+  const discountType = discountTypeInput.trim().toUpperCase();
+  const discountCents =
+    discountType === "PERCENT"
+      ? Math.round(amountCents * (parsePercentage(discountInput) / 100))
+      : parseCurrencyToCents(discountInput);
+
+  return formatCents(Math.max(0, amountCents - discountCents));
 }
 
 function mapRequestCategoryToProjectType(category: string): string {
@@ -105,12 +139,16 @@ export async function createInvoiceAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
   const workstream = String(formData.get("workstream") ?? "").trim();
+  const amountInput = String(formData.get("amount") ?? "").trim();
+  const discountInput = String(formData.get("discount") ?? "").trim();
+  const discountTypeInput = String(formData.get("discountType") ?? "AMOUNT").trim();
+  const amount = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
   try {
     await prisma.invoice.create({
       data: {
         label: String(formData.get("label") ?? "").trim(),
         workstream,
-        amount: String(formData.get("amount") ?? "").trim(),
+        amount,
         status: String(formData.get("status") ?? "").trim(),
         projectId,
       },
@@ -126,13 +164,17 @@ export async function updateInvoiceAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
   const workstream = String(formData.get("workstream") ?? "").trim();
+  const amountInput = String(formData.get("amount") ?? "").trim();
+  const discountInput = String(formData.get("discount") ?? "").trim();
+  const discountTypeInput = String(formData.get("discountType") ?? "AMOUNT").trim();
+  const amount = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
   try {
     await prisma.invoice.update({
       where: { id },
       data: {
         label: String(formData.get("label") ?? "").trim(),
         workstream,
-        amount: String(formData.get("amount") ?? "").trim(),
+        amount,
         status: String(formData.get("status") ?? "").trim(),
         projectId,
       },
@@ -153,6 +195,29 @@ export async function deleteInvoiceAction(id: string) {
     throw e;
   }
   redirect("/portal/admin/invoices");
+}
+
+export async function setInvoiceStatusAction(id: string, nextStatus: string) {
+  await requireAdmin();
+
+  const normalizedStatus = nextStatus.trim();
+  const allowedStatuses = new Set(INVOICE_STATUSES);
+
+  if (!allowedStatuses.has(normalizedStatus as (typeof INVOICE_STATUSES)[number])) {
+    redirect(`/portal/admin/invoices?error=${encodeURIComponent("Invalid invoice status.")}`);
+  }
+
+  try {
+    await prisma.invoice.update({
+      where: { id },
+      data: { status: normalizedStatus },
+    });
+  } catch (e) {
+    console.error("setInvoiceStatusAction failed:", e);
+    redirect(`/portal/admin/invoices?error=${encodeURIComponent("Failed to update invoice status.")}`);
+  }
+
+  redirect(`/portal/admin/invoices?message=${encodeURIComponent(`Invoice marked ${normalizedStatus.toLowerCase()}.`)}`);
 }
 
 // ─── Support Items ─────────────────────────────────────────────────────────────

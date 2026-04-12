@@ -71,6 +71,25 @@ function parsePercentage(input: string): number {
   return value;
 }
 
+function parseDiscountCents(
+  discountInput: string,
+  discountTypeInput: string,
+  subtotalCents: number,
+): number {
+  const discountType = discountTypeInput.trim().toUpperCase();
+
+  if (!discountInput.trim()) {
+    return 0;
+  }
+
+  if (discountType === "PERCENT") {
+    const discountPercent = parsePercentage(discountInput);
+    return Math.round(subtotalCents * (discountPercent / 100));
+  }
+
+  return parseCurrencyToCents(discountInput);
+}
+
 function parseQuoteForm(formData: FormData) {
   const label = String(formData.get("label") ?? "").trim();
   const workstream = String(formData.get("workstream") ?? "").trim();
@@ -81,7 +100,8 @@ function parseQuoteForm(formData: FormData) {
   const lineItemsRaw = String(formData.get("lineItems") ?? "").trim();
   const validUntilRaw = String(formData.get("validUntil") ?? "").trim();
 
-  const discountCents = parseCurrencyToCents(String(formData.get("discount") ?? "0"));
+  const discountInput = String(formData.get("discount") ?? "0").trim();
+  const discountType = String(formData.get("discountType") ?? "AMOUNT").trim();
   const taxPercent = parsePercentage(String(formData.get("tax") ?? "0"));
 
   if (!label) {
@@ -90,6 +110,7 @@ function parseQuoteForm(formData: FormData) {
 
   const lineItems = parseLineItemsText(lineItemsRaw);
   const subtotalCents = lineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
+  const discountCents = parseDiscountCents(discountInput, discountType, subtotalCents);
   const taxableBaseCents = Math.max(0, subtotalCents - discountCents);
   const taxCents = Math.round(taxableBaseCents * (taxPercent / 100));
   const totalCents = taxableBaseCents + taxCents;

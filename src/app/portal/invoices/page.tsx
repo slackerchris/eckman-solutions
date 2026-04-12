@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireSession } from "@/lib/auth/session";
+import { buildClientPaymentUrl } from "@/lib/client-payment";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Invoices — Eckman Solutions Portal" };
@@ -20,6 +21,7 @@ export default async function ClientInvoicesPage({
     where: isAdmin
       ? undefined
       : {
+          status: { notIn: ["Draft", "draft"] },
           OR: [
             { project: { userId: session.userId } },
             { quote: { userId: session.userId } },
@@ -80,7 +82,17 @@ export default async function ClientInvoicesPage({
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {invoices.map((inv) => (
+          {invoices.map((inv) => {
+            const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
+              invoiceId: inv.id,
+              amount: inv.amount,
+              status: inv.status,
+              label: inv.label,
+              workstream: inv.workstream,
+              projectName: inv.project?.name,
+            });
+
+            return (
             <article
               key={inv.id}
               style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "18px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}
@@ -121,9 +133,9 @@ export default async function ClientInvoicesPage({
                   {inv.status}
                 </span>
                 {!isAdmin && ["sent", "overdue"].includes(inv.status.toLowerCase()) ? (
-                  paymentBaseUrl ? (
+                  payUrl ? (
                     <a
-                      href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(inv.id)}`}
+                      href={payUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", textDecoration: "none" }}
@@ -141,7 +153,8 @@ export default async function ClientInvoicesPage({
                 ) : null}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

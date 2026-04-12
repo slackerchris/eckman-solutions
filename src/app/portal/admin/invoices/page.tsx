@@ -3,13 +3,43 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { deleteInvoiceAction } from "@/app/portal/admin/actions";
+import { deleteInvoiceAction, setInvoiceStatusAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const metadata: Metadata = { title: "Invoices — Admin" };
 
-export default async function AdminInvoicesPage() {
+function getQuickStatusActions(currentStatus: string): Array<{ label: string; status: string }> {
+  const normalized = currentStatus.trim().toLowerCase();
+
+  if (normalized === "draft") {
+    return [{ label: "Mark sent", status: "Sent" }];
+  }
+  if (normalized === "sent") {
+    return [
+      { label: "Mark paid", status: "Paid" },
+      { label: "Mark overdue", status: "Overdue" },
+    ];
+  }
+  if (normalized === "overdue") {
+    return [{ label: "Mark paid", status: "Paid" }];
+  }
+  if (normalized === "paid") {
+    return [{ label: "Set sent", status: "Sent" }];
+  }
+  if (normalized === "cancelled") {
+    return [{ label: "Reopen draft", status: "Draft" }];
+  }
+
+  return [{ label: "Set draft", status: "Draft" }];
+}
+
+export default async function AdminInvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string; error?: string }>;
+}) {
   await requireAdmin();
+  const query = await searchParams;
   const invoices = await prisma.invoice.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -38,6 +68,18 @@ export default async function AdminInvoicesPage() {
         </Link>
       </div>
 
+      {query.message ? (
+        <p style={{ marginBottom: "16px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, .35)", background: "rgba(16, 185, 129, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#047857" }}>
+          {query.message}
+        </p>
+      ) : null}
+
+      {query.error ? (
+        <p style={{ marginBottom: "16px", borderRadius: "12px", border: "1px solid rgba(239, 68, 68, .35)", background: "rgba(239, 68, 68, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#b91c1c" }}>
+          {query.error}
+        </p>
+      ) : null}
+
       {invoices.length === 0 ? (
         <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No invoices yet. Add one above.</p>
       ) : (
@@ -58,7 +100,17 @@ export default async function AdminInvoicesPage() {
                   {inv.quote ? " • from quote" : ""}
                 </p>
               </div>
-              <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+              <div style={{ display: "flex", gap: "8px", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {getQuickStatusActions(inv.status).map((action) => (
+                  <form key={action.status} action={setInvoiceStatusAction.bind(null, inv.id, action.status)}>
+                    <button
+                      type="submit"
+                      style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 14px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
+                    >
+                      {action.label}
+                    </button>
+                  </form>
+                ))}
                 <Link
                   href={`/portal/admin/invoices/${inv.id}/edit`}
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}

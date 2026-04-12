@@ -14,7 +14,12 @@ export default async function ClientProjectsPage() {
     where: isAdmin ? undefined : { userId: session.userId },
     orderBy: { createdAt: "desc" },
     include: {
-      invoices: { orderBy: { createdAt: "desc" } },
+      invoices: isAdmin
+        ? { orderBy: { createdAt: "desc" } }
+        : {
+            where: { status: { notIn: ["Draft", "draft"] } },
+            orderBy: { createdAt: "desc" },
+          },
       supportItems: { orderBy: { createdAt: "desc" } },
     },
   });
