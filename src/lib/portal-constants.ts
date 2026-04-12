@@ -28,6 +28,15 @@ export const INVOICE_STATUSES = [
   "Cancelled",
 ] as const;
 
+export const QUOTE_STATUSES = [
+  "Draft",
+  "Sent",
+  "Accepted",
+  "Rejected",
+  "Expired",
+  "Converted",
+] as const;
+
 export const SUPPORT_STATUSES = [
   "Open",
   "In progress",

@@ -22,6 +22,7 @@ model User {
   resetToken          String?   @unique
   resetTokenExpiresAt DateTime?
   projects            Project[]
+  quotes              Quote[]
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }
@@ -36,6 +37,7 @@ model Project {
   userId       String?
   user         User?         @relation(fields: [userId], references: [id])
   invoices     Invoice[]
+  quotes       Quote[]
   supportItems SupportItem[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -48,8 +50,42 @@ model Invoice {
   status    String
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id])
+  quoteId   String?
+  quote     Quote?   @relation(fields: [quoteId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Quote {
+  id            String          @id @default(cuid())
+  label         String
+  status        String          @default("Draft")
+  notes         String          @default("")
+  validUntil    DateTime?
+  subtotalCents Int             @default(0)
+  discountCents Int             @default(0)
+  taxCents      Int             @default(0)
+  totalCents    Int             @default(0)
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
+  projectId     String?
+  project       Project?        @relation(fields: [projectId], references: [id])
+  lineItems     QuoteLineItem[]
+  invoices      Invoice[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model QuoteLineItem {
+  id             String   @id @default(cuid())
+  quoteId        String
+  quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  description    String
+  quantity       Int      @default(1)
+  unitPriceCents Int      @default(0)
+  position       Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model SupportItem {

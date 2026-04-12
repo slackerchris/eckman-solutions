@@ -11,8 +11,9 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [projectCount, invoiceCount, requestCount, changeCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
+  const [projectCount, quoteCount, invoiceCount, requestCount, changeCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
     prisma.project.count(),
+    prisma.quote.count(),
     prisma.invoice.count(),
     prisma.supportItem.count({ where: { projectId: null } }),
     prisma.supportItem.count({ where: { projectId: { not: null }, purpose: "Change Request" } }),
@@ -24,6 +25,7 @@ export default async function AdminPage() {
   const sections = [
     { label: "Users", href: "/portal/admin/users", count: userCount, description: "Manage client accounts — reset passwords, disable or remove users." },
     { label: "Projects", href: "/portal/admin/projects", count: projectCount, description: "Manage active and completed projects shown in the portal." },
+    { label: "Quotes", href: "/portal/admin/quotes", count: quoteCount, description: "Create estimates with line items and convert approved quotes into projects/invoices." },
     { label: "Invoices", href: "/portal/admin/invoices", count: invoiceCount, description: "Create and update invoice records for the billing section." },
     { label: "Request queue", href: "/portal/admin/requests", count: requestCount, description: "Review incoming requests that are not linked to a project yet." },
     { label: "Change queue", href: "/portal/admin/changes", count: changeCount, description: "Review project-linked change requests for existing project additions." },

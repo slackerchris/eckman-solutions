@@ -36,6 +36,7 @@ export default async function PortalLayout({
             <PortalExitLink />
             {session ? <Link href="/portal">Dashboard</Link> : null}
             {session ? <Link href={session.role === "ADMIN" ? "/portal/admin/projects" : "/portal/projects"}>Projects</Link> : null}
+            {session?.role === "ADMIN" ? <Link href="/portal/admin/quotes">Quotes</Link> : null}
             {session ? <Link href="/portal/invoices">Invoices</Link> : null}
             {session ? (
               <Link
