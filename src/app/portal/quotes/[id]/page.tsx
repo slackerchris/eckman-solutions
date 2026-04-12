@@ -5,16 +5,24 @@ import { notFound, redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { formatCents } from "@/lib/quotes";
+import { acceptQuoteAction } from "@/app/portal/quotes/actions";
 
 export const metadata: Metadata = { title: "Quote Details — Portal" };
 
-export default async function ClientQuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClientQuoteDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ message?: string; error?: string }>;
+}) {
   const session = await requireSession();
   if (session.role === "ADMIN") {
     redirect("/portal/admin/quotes");
   }
 
   const { id } = await params;
+  const query = await searchParams;
   const quote = await prisma.quote.findUnique({
     where: { id },
     include: {
@@ -33,6 +41,8 @@ export default async function ClientQuoteDetailPage({ params }: { params: Promis
   if (!ownsByUser && !ownsByProject) {
     notFound();
   }
+
+  const canAccept = !["Accepted", "Converted", "Rejected", "Expired"].includes(quote.status);
 
   return (
     <section style={{ maxWidth: "860px" }}>
@@ -55,6 +65,26 @@ export default async function ClientQuoteDetailPage({ params }: { params: Promis
         {quote.project ? <span>• Project: {quote.project.name}</span> : null}
         {quote.user ? <span>• Client: {quote.user.name}</span> : null}
       </div>
+
+      {query.message ? (
+        <p style={{ marginBottom: "14px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, .35)", background: "rgba(16, 185, 129, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#047857" }}>
+          {query.message}
+        </p>
+      ) : null}
+
+      {query.error ? (
+        <p style={{ marginBottom: "14px", borderRadius: "12px", border: "1px solid rgba(239, 68, 68, .35)", background: "rgba(239, 68, 68, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#b91c1c" }}>
+          {query.error}
+        </p>
+      ) : null}
+
+      {canAccept ? (
+        <form action={acceptQuoteAction.bind(null, quote.id)} style={{ marginBottom: "16px" }}>
+          <button type="submit" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem" }}>
+            Accept quote
+          </button>
+        </form>
+      ) : null}
 
       <article style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 22px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
