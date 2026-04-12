@@ -1,5 +1,8 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
+import nodemailer from "nodemailer";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
@@ -11,6 +14,49 @@ function getActionErrorMessage(error: unknown, fallback: string): string {
     return error.message;
   }
   return fallback;
+}
+
+function getBaseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_BASE_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  );
+}
+
+function buildPublicQuoteUrl(token: string): string {
+  return `${getBaseUrl()}/quote/${token}`;
+}
+
+async function createUniqueQuoteToken(): Promise<string> {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const token = randomUUID().replace(/-/g, "");
+    const existing = await prisma.quote.findUnique({ where: { publicToken: token }, select: { id: true } });
+    if (!existing) return token;
+  }
+
+  throw new Error("Failed to create a unique share token. Try again.");
+}
+
+async function ensureQuotePublicToken(id: string): Promise<{ id: string; label: string; token: string }> {
+  const quote = await prisma.quote.findUnique({ where: { id }, select: { id: true, label: true, publicToken: true } });
+  if (!quote) {
+    throw new Error("Quote not found.");
+  }
+
+  if (quote.publicToken) {
+    return { id: quote.id, label: quote.label, token: quote.publicToken };
+  }
+
+  const token = await createUniqueQuoteToken();
+  await prisma.quote.update({
+    where: { id: quote.id },
+    data: {
+      publicToken: token,
+      sharedAt: new Date(),
+    },
+  });
+
+  return { id: quote.id, label: quote.label, token };
 }
 
 function parsePercentage(input: string): number {
@@ -148,6 +194,87 @@ export async function deleteQuoteAction(id: string) {
 
   await prisma.quote.delete({ where: { id } });
   redirect("/portal/admin/quotes");
+}
+
+export async function createQuoteShareLinkAction(id: string) {
+  await requireAdmin();
+
+  try {
+    const quote = await ensureQuotePublicToken(id);
+    const shareUrl = buildPublicQuoteUrl(quote.token);
+    redirect(`/portal/admin/quotes?message=${encodeURIComponent(`Share link ready: ${shareUrl}`)}`);
+  } catch (error) {
+    const message = getActionErrorMessage(error, "Failed to create share link.");
+    redirect(`/portal/admin/quotes?error=${encodeURIComponent(message)}`);
+  }
+}
+
+export async function emailQuoteShareLinkAction(id: string) {
+  await requireAdmin();
+
+  try {
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        user: { select: { name: true, email: true } },
+      },
+    });
+
+    if (!quote) {
+      throw new Error("Quote not found.");
+    }
+
+    if (!quote.user?.email) {
+      throw new Error("Link a client to this quote before emailing.");
+    }
+
+    const smtpHost = process.env.SMTP_HOST;
+    if (!smtpHost) {
+      throw new Error("SMTP is not configured on the server.");
+    }
+
+    const tokenData = await ensureQuotePublicToken(id);
+    const shareUrl = buildPublicQuoteUrl(tokenData.token);
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Eckman Solutions" <${process.env.SMTP_USER}>`,
+      to: quote.user.email,
+      subject: `Your quote: ${quote.label}`,
+      text: [
+        `Hi ${quote.user.name},`,
+        "",
+        "Your quote is ready. You can view it at this secure link:",
+        shareUrl,
+        "",
+        "No login is required to view this quote link.",
+        "",
+        "- Eckman Solutions",
+      ].join("\n"),
+    });
+
+    await prisma.quote.update({
+      where: { id: quote.id },
+      data: {
+        status: quote.status === "Draft" ? "Sent" : quote.status,
+        sharedAt: quote.sharedAt ?? new Date(),
+      },
+    });
+
+    redirect(`/portal/admin/quotes?message=${encodeURIComponent(`Quote link emailed to ${quote.user.email}`)}`);
+  } catch (error) {
+    const message = getActionErrorMessage(error, "Failed to email quote link.");
+    redirect(`/portal/admin/quotes?error=${encodeURIComponent(message)}`);
+  }
 }
 
 export async function convertQuoteToInvoiceAction(id: string) {
