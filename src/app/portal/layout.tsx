@@ -32,37 +32,70 @@ export default async function PortalLayout({
               ) : null}
             </div>
           </div>
-          <nav style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: ".875rem", color: "var(--muted)", flexWrap: "wrap" }}>
-            <PortalExitLink />
-            {session ? <Link href="/portal">Dashboard</Link> : null}
-            {session ? <Link href={session.role === "ADMIN" ? "/portal/admin/projects" : "/portal/projects"}>Projects</Link> : null}
-            {session ? <Link href={session.role === "ADMIN" ? "/portal/admin/quotes" : "/portal/quotes"}>Quotes</Link> : null}
-            {session ? <Link href="/portal/invoices">Invoices</Link> : null}
-            {session ? (
-              <Link
-                href="/portal/requests/new"
-                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".825rem", color: "var(--accent)", background: "transparent", textDecoration: "none", fontWeight: 600 }}
-              >
-                + Request
-              </Link>
-            ) : null}
-            {session ? <Link href="/portal/profile">Profile</Link> : null}
-            {session?.role === "ADMIN" ? (
-              <Link href="/portal/admin" style={{ color: "var(--accent)", fontWeight: 600 }}>Admin</Link>
-            ) : null}
-            {session ? (
-              <form action={logoutPortalAction}>
-                <button
-                  type="submit"
-                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".875rem", color: "var(--ink)", background: "transparent", cursor: "pointer" }}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+            <div style={{ fontSize: ".8rem", color: "var(--muted)" }}>
+              <PortalExitLink />
+            </div>
+            <nav style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px", flexWrap: "wrap", fontSize: ".85rem" }}>
+              {session ? (
+                <Link href="/portal" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                  Dashboard
+                </Link>
+              ) : null}
+              {session ? (
+                <Link href={session.role === "ADMIN" ? "/portal/admin/projects" : "/portal/projects"} style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                  Projects
+                </Link>
+              ) : null}
+              {session ? (
+                <Link href="/portal/invoices" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                  Invoices
+                </Link>
+              ) : null}
+
+              {session ? (
+                <Link
+                  href="/portal/requests/new"
+                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 14px", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                 >
-                  Sign out
-                </button>
-              </form>
-            ) : (
-              <Link href="/portal/login">Login</Link>
-            )}
-          </nav>
+                  + Request
+                </Link>
+              ) : null}
+
+              {session ? (
+                <details style={{ position: "relative" }}>
+                  <summary style={{ listStyle: "none", border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", cursor: "pointer", userSelect: "none" }}>
+                    More
+                  </summary>
+                  <div style={{ position: "absolute", right: 0, marginTop: "6px", minWidth: "180px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", padding: "8px", display: "grid", gap: "4px", zIndex: 30 }}>
+                    <Link href={session.role === "ADMIN" ? "/portal/admin/quotes" : "/portal/quotes"} style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
+                      Quotes
+                    </Link>
+                    <Link href="/portal/profile" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
+                      Profile
+                    </Link>
+                    {session.role === "ADMIN" ? (
+                      <Link href="/portal/admin" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
+                        Admin
+                      </Link>
+                    ) : null}
+                    <form action={logoutPortalAction}>
+                      <button
+                        type="submit"
+                        style={{ width: "100%", textAlign: "left", border: "none", borderRadius: "8px", padding: "8px 10px", color: "var(--ink)", background: "transparent", cursor: "pointer", fontSize: ".85rem" }}
+                      >
+                        Sign out
+                      </button>
+                    </form>
+                  </div>
+                </details>
+              ) : (
+                <Link href="/portal/login" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                  Login
+                </Link>
+              )}
+            </nav>
+          </div>
         </div>
       </header>
       <main>
