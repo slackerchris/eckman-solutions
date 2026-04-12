@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { markInvoicePaidAction } from "@/app/portal/invoices/actions";
 
 export const metadata: Metadata = { title: "Invoices — Eckman Solutions Portal" };
 
@@ -13,6 +12,7 @@ export default async function ClientInvoicesPage({
   searchParams: Promise<{ message?: string; error?: string }>;
 }) {
   const query = await searchParams;
+  const paymentBaseUrl = process.env.NEXT_PUBLIC_CLIENT_PAYMENT_URL?.trim();
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
@@ -118,11 +118,23 @@ export default async function ClientInvoicesPage({
                   {inv.status}
                 </span>
                 {!isAdmin && ["sent", "overdue"].includes(inv.status.toLowerCase()) ? (
-                  <form action={markInvoicePaidAction.bind(null, inv.id)}>
-                    <button type="submit" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}>
-                      Mark paid
-                    </button>
-                  </form>
+                  paymentBaseUrl ? (
+                    <a
+                      href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(inv.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", textDecoration: "none" }}
+                    >
+                      Pay now
+                    </a>
+                  ) : (
+                    <a
+                      href="#"
+                      style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", textDecoration: "none" }}
+                    >
+                      Pay now
+                    </a>
+                  )
                 ) : null}
               </div>
             </article>

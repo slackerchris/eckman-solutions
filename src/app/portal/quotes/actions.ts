@@ -23,7 +23,7 @@ export async function acceptQuoteAction(id: string) {
     redirect("/portal/admin/quotes");
   }
 
-  let successRedirect = `/portal/quotes/${id}?message=${encodeURIComponent("Quote accepted.")}`;
+  let successRedirect = `/portal/invoices`;
 
   try {
     const quote = await prisma.quote.findUnique({
@@ -51,8 +51,8 @@ export async function acceptQuoteAction(id: string) {
     const existingInvoice = await prisma.invoice.findFirst({ where: { quoteId: id }, select: { id: true } });
 
     if (!existingInvoice) {
-      await prisma.$transaction([
-        prisma.invoice.create({
+      const createdInvoiceId = await prisma.$transaction(async (tx) => {
+        const createdInvoice = await tx.invoice.create({
           data: {
             label: `Quote: ${quote.label}`,
             amount: formatCents(quote.totalCents),
@@ -68,14 +68,17 @@ export async function acceptQuoteAction(id: string) {
               })),
             },
           },
-        }),
-        prisma.quote.update({
+        });
+
+        await tx.quote.update({
           where: { id: quote.id },
           data: { status: "Accepted" },
-        }),
-      ]);
+        });
 
-      successRedirect = `/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Draft invoice created for admin review.")}`;
+        return createdInvoice.id;
+      });
+
+      successRedirect = `/portal/invoices/${createdInvoiceId}`;
     } else {
       if (quote.status !== "Accepted") {
         await prisma.quote.update({
@@ -84,7 +87,7 @@ export async function acceptQuoteAction(id: string) {
         });
       }
 
-      successRedirect = `/portal/quotes/${quote.id}?message=${encodeURIComponent("Quote accepted. Existing invoice is already linked.")}`;
+      successRedirect = `/portal/invoices/${existingInvoice.id}`;
     }
   } catch (error) {
     const message = getActionErrorMessage(error, "Failed to accept quote.");

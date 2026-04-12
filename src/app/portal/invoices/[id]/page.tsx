@@ -5,11 +5,11 @@ import { notFound, redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { formatCents } from "@/lib/quotes";
-import { markInvoicePaidAction } from "@/app/portal/invoices/actions";
 
 export const metadata: Metadata = { title: "Invoice Details — Portal" };
 
 export default async function ClientInvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const paymentBaseUrl = process.env.NEXT_PUBLIC_CLIENT_PAYMENT_URL?.trim();
   const session = await requireSession();
   if (session.role === "ADMIN") {
     redirect("/portal/admin/invoices");
@@ -74,11 +74,25 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
       </div>
 
       {["sent", "overdue"].includes(statusLower) ? (
-        <form action={markInvoicePaidAction.bind(null, invoice.id)} style={{ marginBottom: "16px" }}>
-          <button type="submit" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 22px", fontSize: ".86rem" }}>
-            Mark paid
-          </button>
-        </form>
+        paymentBaseUrl ? (
+          <a
+            href={`${paymentBaseUrl}${paymentBaseUrl.includes("?") ? "&" : "?"}invoice=${encodeURIComponent(invoice.id)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+            style={{ marginBottom: "16px", borderRadius: "999px", padding: "10px 22px", fontSize: ".86rem", display: "inline-block", textDecoration: "none" }}
+          >
+            Pay now
+          </a>
+        ) : (
+          <a
+            href="#"
+            className="btn-primary"
+            style={{ marginBottom: "16px", borderRadius: "999px", padding: "10px 22px", fontSize: ".86rem", display: "inline-block", textDecoration: "none" }}
+          >
+            Pay now
+          </a>
+        )
       ) : null}
 
       <article style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 22px" }}>
