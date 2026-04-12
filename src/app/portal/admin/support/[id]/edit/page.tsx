@@ -6,40 +6,19 @@ import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { updateSupportItemAction } from "@/app/portal/admin/actions";
 import { REQUEST_PURPOSE_DEFINITIONS, getRequestPurposeDefinition, SUPPORT_CLOSED_SUB_STATUSES, SUPPORT_ON_HOLD_SUB_STATUSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { inputStyle, selectStyle, labelStyle } from "@/components/form-styles";
 
 export const metadata: Metadata = { title: "Edit Support Item — Admin" };
 
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: "1rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const selectStyle = {
-  ...inputStyle,
-  appearance: "none" as const,
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23888' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-  backgroundRepeat: "no-repeat" as const,
-  backgroundPosition: "right 12px center",
-  backgroundSize: "20px",
-  paddingRight: "40px",
-  cursor: "pointer",
-};
-
-const labelStyle = {
-  display: "block",
-  fontSize: ".825rem",
-  fontWeight: 600,
-  color: "var(--muted)",
-  marginBottom: "6px",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".08em",
-};
+const REQUEST_CATEGORIES = [
+  "General",
+  "Websites",
+  "Web Apps",
+  "Custom Software",
+  "Data Analytics",
+  "Hardware & IT",
+  "Not sure yet",
+] as const;
 
 export default async function EditSupportItemPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -76,6 +55,17 @@ export default async function EditSupportItemPage({ params }: { params: Promise<
         <div>
           <label htmlFor="detail" style={labelStyle}>Detail</label>
           <textarea id="detail" name="detail" required rows={4} defaultValue={item.detail} style={{ ...inputStyle, resize: "vertical" }} />
+        </div>
+        <div>
+          <label htmlFor="category" style={labelStyle}>Request type</label>
+          <select id="category" name="category" required defaultValue={item.category ?? "General"} style={selectStyle}>
+            {!REQUEST_CATEGORIES.includes((item.category ?? "General") as (typeof REQUEST_CATEGORIES)[number]) ? (
+              <option value={item.category}>{item.category}</option>
+            ) : null}
+            {REQUEST_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="status" style={labelStyle}>Status</label>

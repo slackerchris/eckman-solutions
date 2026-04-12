@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { logoutPortalAction } from "@/app/portal/actions";
 import { getSession } from "@/lib/auth/session";
 import { PortalExitLink } from "@/components/portal-exit-link";
+import { PortalMoreMenu } from "@/components/portal-more-menu";
 
 export default async function PortalLayout({
   children,
@@ -68,34 +68,7 @@ export default async function PortalLayout({
               ) : null}
 
               {session ? (
-                <details style={{ position: "relative" }}>
-                  <summary style={{ listStyle: "none", border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", cursor: "pointer", userSelect: "none" }}>
-                    More
-                  </summary>
-                  <div style={{ position: "absolute", right: 0, marginTop: "6px", minWidth: "180px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", padding: "8px", display: "grid", gap: "4px", zIndex: 30 }}>
-                    {session.role === "ADMIN" ? (
-                      <Link href="/portal/admin/quotes" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
-                        Quotes
-                      </Link>
-                    ) : null}
-                    <Link href="/portal/profile" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
-                      Profile
-                    </Link>
-                    {session.role === "ADMIN" ? (
-                      <Link href="/portal/admin" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
-                        Admin
-                      </Link>
-                    ) : null}
-                    <form action={logoutPortalAction}>
-                      <button
-                        type="submit"
-                        style={{ width: "100%", textAlign: "left", border: "none", borderRadius: "8px", padding: "8px 10px", color: "var(--ink)", background: "transparent", cursor: "pointer", fontSize: ".85rem" }}
-                      >
-                        Sign out
-                      </button>
-                    </form>
-                  </div>
-                </details>
+                <PortalMoreMenu role={session.role} />
               ) : (
                 <Link href="/portal/login" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
                   Login

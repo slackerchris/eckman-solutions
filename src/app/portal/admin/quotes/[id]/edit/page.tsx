@@ -8,40 +8,9 @@ import { lineItemsToText } from "@/lib/quotes";
 import { QUOTE_STATUSES } from "@/lib/portal-constants";
 import { updateQuoteAction } from "@/app/portal/admin/quotes/actions";
 import { QuoteLineItemsField } from "@/components/quote-line-items-field";
+import { inputStyle, selectStyle, labelStyle } from "@/components/form-styles";
 
 export const metadata: Metadata = { title: "Edit Quote — Admin" };
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: "1rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const selectStyle = {
-  ...inputStyle,
-  appearance: "none" as const,
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23888' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-  backgroundRepeat: "no-repeat" as const,
-  backgroundPosition: "right 12px center",
-  backgroundSize: "20px",
-  paddingRight: "40px",
-  cursor: "pointer",
-};
-
-const labelStyle = {
-  display: "block",
-  fontSize: ".825rem",
-  fontWeight: 600,
-  color: "var(--muted)",
-  marginBottom: "6px",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".08em",
-};
 
 export default async function EditQuotePage({
   params,

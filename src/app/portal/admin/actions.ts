@@ -6,6 +6,11 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
 import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
+function normalizeSupportCategory(input: string | null | undefined): string {
+  const category = (input ?? "").trim();
+  return category || "General";
+}
+
 function mapRequestCategoryToProjectType(category: string): string {
   switch (category) {
     case "Websites":
@@ -155,6 +160,7 @@ export async function deleteInvoiceAction(id: string) {
 export async function createSupportItemAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const category = normalizeSupportCategory(String(formData.get("category") ?? ""));
   const purposeInput = String(formData.get("purpose") ?? "").trim();
   const purposeIdInput = String(formData.get("purposeId") ?? "").trim();
   const purposeDef = getRequestPurposeDefinition(purposeIdInput, purposeInput);
@@ -172,6 +178,7 @@ export async function createSupportItemAction(formData: FormData) {
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        category,
         purpose: purposeDef.label,
         purposeId: purposeDef.id,
         queueCategory: purposeDef.queueCategory,
@@ -191,6 +198,7 @@ export async function createSupportItemAction(formData: FormData) {
 export async function updateSupportItemAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const category = normalizeSupportCategory(String(formData.get("category") ?? ""));
   const purposeInput = String(formData.get("purpose") ?? "").trim();
   const purposeIdInput = String(formData.get("purposeId") ?? "").trim();
   const purposeDef = getRequestPurposeDefinition(purposeIdInput, purposeInput);
@@ -210,6 +218,7 @@ export async function updateSupportItemAction(id: string, formData: FormData) {
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
+        category,
         purpose: purposeDef.label,
         purposeId: purposeDef.id,
         queueCategory: purposeDef.queueCategory,
@@ -257,12 +266,14 @@ export async function convertRequestToProjectAction(id: string) {
     redirect(`/portal/admin/projects/${request.projectId}/edit`);
   }
 
+  const category = normalizeSupportCategory(request.category);
+
   const project = await prisma.project.create({
     data: {
       name: request.title,
-      type: mapRequestCategoryToProjectType(request.category),
+      type: mapRequestCategoryToProjectType(category),
       status: "New",
-      notes: `Converted from request (${request.category} / ${request.purpose})\n\n${request.detail}`,
+      notes: `Converted from request (${category} / ${request.purpose})\n\n${request.detail}`,
       userId: request.userId,
     },
   });

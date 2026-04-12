@@ -80,6 +80,12 @@ Important relationship notes:
 - Quote and Invoice both include workstream to separate tracks inside one project.
 - SupportItem can be linked to project and user but can also exist unlinked for intake.
 
+Terminology note for SupportItem:
+
+- category currently represents service domain (Websites, Web Apps, Data Analytics, etc.).
+- purpose/purposeId represents request intent and queue routing intent.
+- A future migration should consider renaming category to serviceCategory for clarity.
+
 ## 6. Request queue architecture
 
 Queue routing is no longer based on free-text labels alone.

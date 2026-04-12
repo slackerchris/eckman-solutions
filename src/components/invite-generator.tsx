@@ -3,15 +3,12 @@
 import { useActionState } from "react";
 
 import { createInviteAction, type InviteActionState } from "@/app/portal/invite/actions";
+import { inputStyle as baseInputStyle } from "@/components/form-styles";
 
-const inputStyle = {
+const inviteLinkInputStyle = {
+  ...baseInputStyle,
   flex: 1,
-  padding: "12px 14px",
   fontSize: ".875rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
   fontFamily: "monospace",
   minWidth: 0,
 } as const;
@@ -43,7 +40,7 @@ export function InviteGenerator({ baseUrl }: { baseUrl: string }) {
             Copy this link and send it. It can only be used once.
           </p>
           <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-            <input readOnly value={link} style={inputStyle} onFocus={(e) => e.target.select()} />
+            <input readOnly value={link} style={inviteLinkInputStyle} onFocus={(e) => e.target.select()} />
             <button
               type="button"
               style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "10px 20px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}

@@ -3,27 +3,7 @@
 import { useActionState } from "react";
 
 import { signupWithInviteAction, type SignupActionState } from "@/app/portal/invite/actions";
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: "1rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const labelStyle = {
-  display: "block",
-  fontFamily: "monospace",
-  fontSize: ".72rem",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".16em",
-  color: "var(--accent)",
-  marginBottom: "8px",
-};
+import { accentMonoLabelStyle, inputStyle } from "@/components/form-styles";
 
 export function InviteSignupForm({ token }: { token: string }) {
   const action = signupWithInviteAction.bind(null, token);
@@ -38,19 +18,19 @@ export function InviteSignupForm({ token }: { token: string }) {
       )}
 
       <div>
-        <label htmlFor="name" style={labelStyle}>Your name</label>
+        <label htmlFor="name" style={accentMonoLabelStyle}>Your name</label>
         <input id="name" name="name" required style={inputStyle} placeholder="Jane Smith" autoComplete="name" />
       </div>
       <div>
-        <label htmlFor="email" style={labelStyle}>Email address</label>
+        <label htmlFor="email" style={accentMonoLabelStyle}>Email address</label>
         <input id="email" name="email" type="email" required style={inputStyle} placeholder="you@example.com" autoComplete="email" />
       </div>
       <div>
-        <label htmlFor="password" style={labelStyle}>Password</label>
+        <label htmlFor="password" style={accentMonoLabelStyle}>Password</label>
         <input id="password" name="password" type="password" required minLength={8} style={inputStyle} placeholder="8+ characters" autoComplete="new-password" />
       </div>
       <div>
-        <label htmlFor="confirm" style={labelStyle}>Confirm password</label>
+        <label htmlFor="confirm" style={accentMonoLabelStyle}>Confirm password</label>
         <input id="confirm" name="confirm" type="password" required minLength={8} style={inputStyle} placeholder="Re-enter password" autoComplete="new-password" />
       </div>
 

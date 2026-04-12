@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
+const SITE_HOSTNAME_LABEL = "eckman.solutions";
+
 export function PortalExitLink() {
   const router = useRouter();
 
@@ -13,7 +15,7 @@ export function PortalExitLink() {
 
   return (
     <a href="/" onClick={handleClick} style={{ color: "inherit", textDecoration: "none" }}>
-      {typeof window !== "undefined" ? window.location.hostname : "eckman.solutions"}
+      {SITE_HOSTNAME_LABEL}
     </a>
   );
 }

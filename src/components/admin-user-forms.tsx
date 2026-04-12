@@ -4,27 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 
 import type { AdminUserActionState } from "@/app/portal/admin/users/actions";
 import { adminSetPasswordAction } from "@/app/portal/admin/users/actions";
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px 14px",
-  fontSize: ".9rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const labelStyle = {
-  display: "block" as const,
-  fontSize: ".75rem",
-  fontWeight: 600 as const,
-  color: "var(--muted)",
-  marginBottom: "6px",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".08em",
-};
+import { compactInputStyle, compactLabelStyle } from "@/components/form-styles";
 
 export function SetPasswordForm({ userId, onSuccess }: { userId: string; onSuccess?: () => void }) {
   const boundAction = adminSetPasswordAction.bind(null, userId);
@@ -51,12 +31,12 @@ export function SetPasswordForm({ userId, onSuccess }: { userId: string; onSucce
         </p>
       )}
       <div>
-        <label style={labelStyle}>New password</label>
-        <input type="password" name="password" required minLength={8} autoComplete="new-password" style={inputStyle} />
+        <label style={compactLabelStyle}>New password</label>
+        <input type="password" name="password" required minLength={8} autoComplete="new-password" style={compactInputStyle} />
       </div>
       <div>
-        <label style={labelStyle}>Confirm password</label>
-        <input type="password" name="confirm" required minLength={8} autoComplete="new-password" style={inputStyle} />
+        <label style={compactLabelStyle}>Confirm password</label>
+        <input type="password" name="confirm" required minLength={8} autoComplete="new-password" style={compactInputStyle} />
       </div>
       <button
         type="submit"

@@ -110,7 +110,9 @@ model SupportItem {
   id        String   @id @default(cuid())
   title     String
   detail    String
+  // Service category selected by requester (Websites, Web Apps, etc.).
   category  String   @default("General")
+  // Request intent used for queue routing/display (New Project, Change Request, etc.).
   purpose   String   @default("Support Ticket")
   purposeId String?
   queueCategory String?

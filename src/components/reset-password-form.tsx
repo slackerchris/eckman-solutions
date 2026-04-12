@@ -3,27 +3,7 @@
 import { useActionState } from "react";
 
 import { resetPasswordAction, type ResetPasswordState } from "@/app/portal/reset-password/actions";
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: "1rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const labelStyle = {
-  display: "block" as const,
-  fontSize: ".825rem",
-  fontWeight: 600 as const,
-  color: "var(--muted)",
-  marginBottom: "6px",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".08em",
-};
+import { inputStyle, labelStyle } from "@/components/form-styles";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const [state, action, pending] = useActionState<ResetPasswordState, FormData>(resetPasswordAction, {});

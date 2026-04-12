@@ -7,27 +7,7 @@ import {
   updateProfileAction,
   type ProfileActionState,
 } from "@/app/portal/profile/actions";
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  fontSize: "1rem",
-  border: "1px solid var(--border)",
-  borderRadius: ".75rem",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  boxSizing: "border-box" as const,
-};
-
-const labelStyle = {
-  display: "block",
-  fontFamily: "monospace",
-  fontSize: ".72rem",
-  textTransform: "uppercase" as const,
-  letterSpacing: ".16em",
-  color: "var(--accent)",
-  marginBottom: "8px",
-};
+import { accentMonoLabelStyle, inputStyle } from "@/components/form-styles";
 
 function Banner({ state }: { state: ProfileActionState }) {
   if (state.success) {
@@ -57,11 +37,11 @@ export function ProfileForm({ name, email }: { name: string; email: string }) {
     <form action={profileAction} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
       <Banner state={profileState} />
       <div>
-        <label htmlFor="name" style={labelStyle}>Display name</label>
+        <label htmlFor="name" style={accentMonoLabelStyle}>Display name</label>
         <input id="name" name="name" required defaultValue={name} style={inputStyle} />
       </div>
       <div>
-        <label htmlFor="email" style={labelStyle}>Email address</label>
+        <label htmlFor="email" style={accentMonoLabelStyle}>Email address</label>
         <input id="email" name="email" type="email" required defaultValue={email} style={inputStyle} />
       </div>
       <div>
@@ -88,15 +68,15 @@ export function PasswordForm() {
     <form action={pwAction} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
       <Banner state={pwState} />
       <div>
-        <label htmlFor="current" style={labelStyle}>Current password</label>
+        <label htmlFor="current" style={accentMonoLabelStyle}>Current password</label>
         <input id="current" name="current" type="password" required style={inputStyle} autoComplete="current-password" />
       </div>
       <div>
-        <label htmlFor="password" style={labelStyle}>New password</label>
+        <label htmlFor="password" style={accentMonoLabelStyle}>New password</label>
         <input id="password" name="password" type="password" required minLength={8} style={inputStyle} placeholder="8+ characters" autoComplete="new-password" />
       </div>
       <div>
-        <label htmlFor="confirm" style={labelStyle}>Confirm new password</label>
+        <label htmlFor="confirm" style={accentMonoLabelStyle}>Confirm new password</label>
         <input id="confirm" name="confirm" type="password" required minLength={8} style={inputStyle} autoComplete="new-password" />
       </div>
       <div>
