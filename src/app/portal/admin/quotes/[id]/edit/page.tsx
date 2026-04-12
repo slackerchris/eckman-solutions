@@ -60,6 +60,8 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
   if (!quote) notFound();
 
   const action = updateQuoteAction.bind(null, quote.id);
+  const taxableBaseCents = Math.max(0, quote.subtotalCents - quote.discountCents);
+  const taxPercent = taxableBaseCents > 0 ? (quote.taxCents / taxableBaseCents) * 100 : 0;
 
   return (
     <section style={{ maxWidth: "760px" }}>
@@ -142,8 +144,8 @@ export default async function EditQuotePage({ params }: { params: Promise<{ id: 
             <input id="discount" name="discount" defaultValue={(quote.discountCents / 100).toFixed(2)} style={inputStyle} />
           </div>
           <div>
-            <label htmlFor="tax" style={labelStyle}>Tax (optional)</label>
-            <input id="tax" name="tax" defaultValue={(quote.taxCents / 100).toFixed(2)} style={inputStyle} />
+            <label htmlFor="tax" style={labelStyle}>Tax % (optional)</label>
+            <input id="tax" name="tax" defaultValue={taxPercent.toFixed(2)} style={inputStyle} />
           </div>
         </div>
 

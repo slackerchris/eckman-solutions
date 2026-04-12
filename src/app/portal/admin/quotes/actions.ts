@@ -6,6 +6,18 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatCents, parseCurrencyToCents, parseLineItemsText } from "@/lib/quotes";
 
+function parsePercentage(input: string): number {
+  const cleaned = input.replace(/[%,\s]/g, "").trim();
+  if (!cleaned) return 0;
+
+  const value = Number(cleaned);
+  if (!Number.isFinite(value) || value < 0 || value > 100) {
+    throw new Error(`Invalid tax percentage: ${input}`);
+  }
+
+  return value;
+}
+
 function parseQuoteForm(formData: FormData) {
   const label = String(formData.get("label") ?? "").trim();
   const status = String(formData.get("status") ?? "Draft").trim() || "Draft";
@@ -16,7 +28,7 @@ function parseQuoteForm(formData: FormData) {
   const validUntilRaw = String(formData.get("validUntil") ?? "").trim();
 
   const discountCents = parseCurrencyToCents(String(formData.get("discount") ?? "0"));
-  const taxCents = parseCurrencyToCents(String(formData.get("tax") ?? "0"));
+  const taxPercent = parsePercentage(String(formData.get("tax") ?? "0"));
 
   if (!label) {
     throw new Error("Quote label is required.");
@@ -24,7 +36,9 @@ function parseQuoteForm(formData: FormData) {
 
   const lineItems = parseLineItemsText(lineItemsRaw);
   const subtotalCents = lineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
-  const totalCents = Math.max(0, subtotalCents - discountCents + taxCents);
+  const taxableBaseCents = Math.max(0, subtotalCents - discountCents);
+  const taxCents = Math.round(taxableBaseCents * (taxPercent / 100));
+  const totalCents = taxableBaseCents + taxCents;
 
   const validUntil = validUntilRaw ? new Date(`${validUntilRaw}T23:59:59.000Z`) : null;
 

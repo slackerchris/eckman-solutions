@@ -120,8 +120,8 @@ export default async function NewQuotePage() {
             <input id="discount" name="discount" style={inputStyle} defaultValue="0" placeholder="0.00" />
           </div>
           <div>
-            <label htmlFor="tax" style={labelStyle}>Tax (optional)</label>
-            <input id="tax" name="tax" style={inputStyle} defaultValue="0" placeholder="0.00" />
+            <label htmlFor="tax" style={labelStyle}>Tax % (optional)</label>
+            <input id="tax" name="tax" style={inputStyle} defaultValue="0" placeholder="8.25" />
           </div>
         </div>
 
