@@ -2,6 +2,8 @@
 
 Marketing website and client portal for https://eckman.solutions built with Next.js.
 
+Architecture reference: [ARCHITECTURE.md](ARCHITECTURE.md)
+
 ## What is included
 
 - Public-facing services website for analytics, websites, apps, custom software, and small business hardware support.
