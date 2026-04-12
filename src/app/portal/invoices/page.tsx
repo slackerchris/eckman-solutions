@@ -3,17 +3,33 @@ import Link from "next/link";
 
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { markInvoicePaidAction } from "@/app/portal/invoices/actions";
 
 export const metadata: Metadata = { title: "Invoices — Eckman Solutions Portal" };
 
-export default async function ClientInvoicesPage() {
+export default async function ClientInvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string; error?: string }>;
+}) {
+  const query = await searchParams;
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
   const invoices = await prisma.invoice.findMany({
-    where: isAdmin ? undefined : { project: { userId: session.userId } },
+    where: isAdmin
+      ? undefined
+      : {
+          OR: [
+            { project: { userId: session.userId } },
+            { quote: { userId: session.userId } },
+          ],
+        },
     orderBy: { createdAt: "desc" },
-    include: { project: { select: { name: true } } },
+    include: {
+      project: { select: { name: true } },
+      quote: { select: { id: true } },
+    },
   });
 
   const totalPaid = invoices
@@ -31,6 +47,18 @@ export default async function ClientInvoicesPage() {
       <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px", marginBottom: "28px" }}>
         {isAdmin ? "All invoices" : "Your invoices"}
       </h2>
+
+      {query.message ? (
+        <p style={{ marginBottom: "16px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, .35)", background: "rgba(16, 185, 129, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#047857" }}>
+          {query.message}
+        </p>
+      ) : null}
+
+      {query.error ? (
+        <p style={{ marginBottom: "16px", borderRadius: "12px", border: "1px solid rgba(239, 68, 68, .35)", background: "rgba(239, 68, 68, .12)", padding: "10px 12px", fontSize: ".85rem", color: "#b91c1c" }}>
+          {query.error}
+        </p>
+      ) : null}
 
       {invoices.length > 0 && (
         <div style={{ display: "flex", gap: "12px", marginBottom: "28px", flexWrap: "wrap" }}>
@@ -61,8 +89,13 @@ export default async function ClientInvoicesPage() {
                 {inv.project && (
                   <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>{inv.project.name}</p>
                 )}
+                {!isAdmin && inv.quote && (
+                  <Link href={`/portal/quotes/${inv.quote.id}`} style={{ marginTop: "6px", display: "inline-block", fontSize: ".78rem", color: "var(--accent)", textDecoration: "none" }}>
+                    View linked quote
+                  </Link>
+                )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
                 <p style={{ fontSize: ".95rem", fontWeight: 700 }}>{inv.amount}</p>
                 <span
                   style={{
@@ -75,6 +108,13 @@ export default async function ClientInvoicesPage() {
                 >
                   {inv.status}
                 </span>
+                {!isAdmin && ["sent", "overdue"].includes(inv.status.toLowerCase()) ? (
+                  <form action={markInvoicePaidAction.bind(null, inv.id)}>
+                    <button type="submit" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", fontSize: ".78rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}>
+                      Mark paid
+                    </button>
+                  </form>
+                ) : null}
               </div>
             </article>
           ))}

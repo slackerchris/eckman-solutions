@@ -25,7 +25,14 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       },
     }),
     prisma.invoice.findMany({
-      where: isAdmin ? undefined : { project: { userId: session.userId } },
+      where: isAdmin
+        ? undefined
+        : {
+            OR: [
+              { project: { userId: session.userId } },
+              { quote: { userId: session.userId } },
+            ],
+          },
       orderBy: { createdAt: "desc" },
       include: { project: { select: { name: true } } },
     }),
@@ -55,6 +62,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const activeProjects = projects.filter(
     (p) => p.status.toLowerCase() !== "complete" && p.status.toLowerCase() !== "cancelled",
   );
+
+  const invoicesAwaitingPayment = invoices.filter((i) => ["sent", "overdue"].includes(i.status.toLowerCase())).length;
+  const invoicesAwaitingAdmin = invoices.filter((i) => i.status.toLowerCase() === "draft").length;
 
   const stats = isAdmin
     ? [
@@ -107,7 +117,20 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       {/* Success banner */}
       {submitted && (
         <div style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--accent-strong)" }}>
-          Your request was submitted — we'll be in touch soon.
+          Your request was submitted — we&apos;ll be in touch soon.
+        </div>
+      )}
+
+      {!isAdmin && (invoicesAwaitingPayment > 0 || invoicesAwaitingAdmin > 0) && (
+        <div style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}>
+          <p style={{ margin: 0 }}>
+            {invoicesAwaitingPayment > 0
+              ? `You have ${invoicesAwaitingPayment} invoice${invoicesAwaitingPayment !== 1 ? "s" : ""} ready for payment.`
+              : `You have ${invoicesAwaitingAdmin} invoice${invoicesAwaitingAdmin !== 1 ? "s" : ""} in draft while we finalize details.`}{" "}
+            <Link href="/portal/invoices" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "none" }}>
+              View invoices
+            </Link>
+          </p>
         </div>
       )}
 
