@@ -45,7 +45,12 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   await requireAdmin();
   const { id } = await params;
   const [invoice, projects] = await Promise.all([
-    prisma.invoice.findUnique({ where: { id } }),
+    prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        lineItems: { orderBy: { position: "asc" } },
+      },
+    }),
     prisma.project.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
   if (!invoice) notFound();
@@ -90,6 +95,21 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
             ))}
           </select>
         </div>
+
+        {invoice.lineItems.length > 0 ? (
+          <div style={{ border: "1px solid var(--border)", borderRadius: ".9rem", padding: "12px 14px", background: "var(--card)" }}>
+            <p style={{ ...labelStyle, marginBottom: "10px" }}>Line items copied from quote</p>
+            <div style={{ display: "grid", gap: "8px" }}>
+              {invoice.lineItems.map((item) => (
+                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: "10px", fontSize: ".86rem", color: "var(--muted)" }}>
+                  <span>{item.description} ({item.quantity} x ${(item.unitPriceCents / 100).toFixed(2)})</span>
+                  <span style={{ color: "var(--ink)", fontWeight: 600 }}>${((item.quantity * item.unitPriceCents) / 100).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div style={{ display: "flex", gap: "12px", paddingTop: "4px" }}>
           <button type="submit" className="btn-primary" style={{ borderRadius: "999px", padding: "10px 28px", fontSize: ".875rem" }}>
             Save changes

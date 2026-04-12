@@ -30,6 +30,7 @@ export async function acceptQuoteAction(id: string) {
       where: { id },
       include: {
         project: { select: { userId: true } },
+        lineItems: { orderBy: { position: "asc" } },
       },
     });
 
@@ -58,6 +59,14 @@ export async function acceptQuoteAction(id: string) {
             status: "Draft",
             projectId: quote.projectId,
             quoteId: quote.id,
+            lineItems: {
+              create: quote.lineItems.map((item, index) => ({
+                description: item.description,
+                quantity: item.quantity,
+                unitPriceCents: item.unitPriceCents,
+                position: index,
+              })),
+            },
           },
         }),
         prisma.quote.update({

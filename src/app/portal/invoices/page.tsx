@@ -29,6 +29,7 @@ export default async function ClientInvoicesPage({
     include: {
       project: { select: { name: true } },
       quote: { select: { id: true } },
+      lineItems: { select: { id: true } },
     },
   });
 
@@ -88,6 +89,14 @@ export default async function ClientInvoicesPage({
                 <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{inv.label}</p>
                 {inv.project && (
                   <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>{inv.project.name}</p>
+                )}
+                <p style={{ marginTop: "4px", fontSize: ".76rem", color: "var(--muted)" }}>
+                  {inv.lineItems.length} item{inv.lineItems.length !== 1 ? "s" : ""}
+                </p>
+                {!isAdmin && (
+                  <Link href={`/portal/invoices/${inv.id}`} style={{ marginTop: "6px", display: "inline-block", fontSize: ".78rem", color: "var(--accent)", textDecoration: "none" }}>
+                    View invoice details
+                  </Link>
                 )}
                 {!isAdmin && inv.quote && (
                   <Link href={`/portal/quotes/${inv.quote.id}`} style={{ marginTop: "6px", display: "inline-block", fontSize: ".78rem", color: "var(--accent)", textDecoration: "none" }}>

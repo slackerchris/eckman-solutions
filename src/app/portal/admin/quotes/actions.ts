@@ -280,7 +280,12 @@ export async function emailQuoteShareLinkAction(id: string) {
 export async function convertQuoteToInvoiceAction(id: string) {
   await requireAdmin();
 
-  const quote = await prisma.quote.findUnique({ where: { id } });
+  const quote = await prisma.quote.findUnique({
+    where: { id },
+    include: {
+      lineItems: { orderBy: { position: "asc" } },
+    },
+  });
   if (!quote) {
     throw new Error("Quote not found.");
   }
@@ -297,6 +302,14 @@ export async function convertQuoteToInvoiceAction(id: string) {
       status: "Draft",
       projectId: quote.projectId,
       quoteId: quote.id,
+      lineItems: {
+        create: quote.lineItems.map((item, index) => ({
+          description: item.description,
+          quantity: item.quantity,
+          unitPriceCents: item.unitPriceCents,
+          position: index,
+        })),
+      },
     },
   });
 

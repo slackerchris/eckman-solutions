@@ -10,7 +10,13 @@ export const metadata: Metadata = { title: "Invoices — Admin" };
 
 export default async function AdminInvoicesPage() {
   await requireAdmin();
-  const invoices = await prisma.invoice.findMany({ orderBy: { createdAt: "desc" } });
+  const invoices = await prisma.invoice.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      lineItems: { select: { id: true } },
+      quote: { select: { id: true } },
+    },
+  });
 
   return (
     <section style={{ padding: "0" }}>
@@ -45,6 +51,10 @@ export default async function AdminInvoicesPage() {
                 <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{inv.label}</p>
                 <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "4px" }}>
                   {inv.amount} &mdash; <span style={{ color: "var(--accent)" }}>{inv.status}</span>
+                </p>
+                <p style={{ marginTop: "4px", fontSize: ".76rem", color: "var(--muted)" }}>
+                  {inv.lineItems.length} item{inv.lineItems.length !== 1 ? "s" : ""}
+                  {inv.quote ? " • from quote" : ""}
                 </p>
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
