@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { deleteSupportItemAction } from "@/app/portal/admin/actions";
+import { convertRequestToProjectAction, deleteSupportItemAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const metadata: Metadata = { title: "Request Queue — Admin" };
@@ -55,8 +55,23 @@ export default async function AdminRequestsPage() {
                 <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "8px" }}>
                   Submitted {new Date(item.createdAt).toLocaleDateString()}
                 </p>
+                {item.subStatus ? (
+                  <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "4px" }}>
+                    Sub-status: {item.subStatus}
+                  </p>
+                ) : null}
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                {item.purpose === "New Project" ? (
+                  <form action={convertRequestToProjectAction.bind(null, item.id)}>
+                    <button
+                      type="submit"
+                      style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--accent)", background: "transparent", cursor: "pointer", fontWeight: 600 }}
+                    >
+                      Convert to project
+                    </button>
+                  </form>
+                ) : null}
                 <Link
                   href={`/portal/admin/support/${item.id}/edit`}
                   style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}

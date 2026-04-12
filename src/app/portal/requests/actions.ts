@@ -40,6 +40,7 @@ export async function submitRequestAction(
         category,
         purpose,
         status: "Open",
+        userId: session.userId,
         projectId,
       },
     });

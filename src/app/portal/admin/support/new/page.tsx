@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { createSupportItemAction } from "@/app/portal/admin/actions";
-import { REQUEST_PURPOSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { REQUEST_PURPOSES, SUPPORT_CLOSED_SUB_STATUSES, SUPPORT_ON_HOLD_SUB_STATUSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "New Support Item — Admin" };
 
@@ -71,6 +71,22 @@ export default async function NewSupportItemPage() {
             {SUPPORT_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="subStatus" style={labelStyle}>Status sub-status (optional)</label>
+          <select id="subStatus" name="subStatus" defaultValue="" style={selectStyle}>
+            <option value="">— None —</option>
+            <optgroup label="On Hold">
+              {SUPPORT_ON_HOLD_SUB_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Closed">
+              {SUPPORT_CLOSED_SUB_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </optgroup>
           </select>
         </div>
         <div>

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { updateSupportItemAction } from "@/app/portal/admin/actions";
-import { REQUEST_PURPOSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { REQUEST_PURPOSES, SUPPORT_CLOSED_SUB_STATUSES, SUPPORT_ON_HOLD_SUB_STATUSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Edit Support Item — Admin" };
 
@@ -79,6 +79,25 @@ export default async function EditSupportItemPage({ params }: { params: Promise<
             {SUPPORT_STATUSES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="subStatus" style={labelStyle}>Status sub-status (optional)</label>
+          <select id="subStatus" name="subStatus" defaultValue={item.subStatus ?? ""} style={selectStyle}>
+            <option value="">— None —</option>
+            {item.subStatus && !SUPPORT_CLOSED_SUB_STATUSES.includes(item.subStatus as (typeof SUPPORT_CLOSED_SUB_STATUSES)[number]) && !SUPPORT_ON_HOLD_SUB_STATUSES.includes(item.subStatus as (typeof SUPPORT_ON_HOLD_SUB_STATUSES)[number]) ? (
+              <option value={item.subStatus}>{item.subStatus}</option>
+            ) : null}
+            <optgroup label="On Hold">
+              {SUPPORT_ON_HOLD_SUB_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Closed">
+              {SUPPORT_CLOSED_SUB_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </optgroup>
           </select>
         </div>
         <div>

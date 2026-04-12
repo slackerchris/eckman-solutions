@@ -22,7 +22,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   if (!item) notFound();
 
   if (!isAdmin) {
-    if (!item.project || item.project.userId !== session.userId) {
+    const ownsByProject = Boolean(item.project && item.project.userId === session.userId);
+    const ownsByRequest = item.userId === session.userId;
+    if (!ownsByProject && !ownsByRequest) {
       notFound();
     }
   }
@@ -30,10 +32,10 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   return (
     <section style={{ maxWidth: "760px" }}>
       <Link
-        href={isAdmin ? (item.projectId ? "/portal/admin/support" : "/portal/admin/requests") : "/portal/projects"}
+        href={isAdmin ? (item.projectId ? "/portal/admin/support" : "/portal/admin/requests") : (item.projectId ? "/portal/projects" : "/portal")}
         style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}
       >
-        ← {isAdmin ? "Queue" : "Projects"}
+        ← {isAdmin ? "Queue" : (item.projectId ? "Projects" : "Dashboard")}
       </Link>
 
       <h2

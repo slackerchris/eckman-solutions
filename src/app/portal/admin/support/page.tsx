@@ -59,6 +59,9 @@ export default async function AdminSupportPage() {
                   <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "4px" }}>Project: {item.project.name}</p>
                 )}
                 <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
+                {item.subStatus ? (
+                  <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "6px" }}>Sub-status: {item.subStatus}</p>
+                ) : null}
               </div>
               <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
                 <Link

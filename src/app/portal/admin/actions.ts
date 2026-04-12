@@ -5,6 +5,25 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
 
+function mapRequestCategoryToProjectType(category: string): string {
+  switch (category) {
+    case "Websites":
+      return "Website Build";
+    case "Web Apps":
+    case "Custom Software":
+      return "Custom Development";
+    case "Data Analytics":
+      return "Consultation";
+    case "Hardware & IT":
+      return "Other";
+    case "Not sure yet":
+    case "General":
+      return "Consultation";
+    default:
+      return "Other";
+  }
+}
+
 // ─── Projects ────────────────────────────────────────────────────────────────
 
 export async function createProjectAction(formData: FormData) {
@@ -119,6 +138,14 @@ export async function createSupportItemAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
   const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const status = String(formData.get("status") ?? "Open").trim() || "Open";
+  const subStatusRaw = String(formData.get("subStatus") ?? "").trim();
+  const subStatus = status === "Closed" || status === "On Hold" ? subStatusRaw : "";
+  let userId: string | null = null;
+  if (projectId) {
+    const project = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } });
+    userId = project?.userId ?? null;
+  }
   const returnTo = !projectId
     ? "/portal/admin/requests"
     : purpose === "Change Request"
@@ -130,7 +157,9 @@ export async function createSupportItemAction(formData: FormData) {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
         purpose,
-        status: String(formData.get("status") ?? "Open").trim() || "Open",
+        status,
+        subStatus,
+        userId,
         projectId,
       },
     });
@@ -145,6 +174,15 @@ export async function updateSupportItemAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
   const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const status = String(formData.get("status") ?? "Open").trim() || "Open";
+  const subStatusRaw = String(formData.get("subStatus") ?? "").trim();
+  const subStatus = status === "Closed" || status === "On Hold" ? subStatusRaw : "";
+  const existing = await prisma.supportItem.findUnique({ where: { id }, select: { userId: true } });
+  let userId = existing?.userId ?? null;
+  if (projectId) {
+    const project = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } });
+    userId = project?.userId ?? userId;
+  }
   const returnTo = !projectId
     ? "/portal/admin/requests"
     : purpose === "Change Request"
@@ -157,7 +195,9 @@ export async function updateSupportItemAction(id: string, formData: FormData) {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
         purpose,
-        status: String(formData.get("status") ?? "Open").trim() || "Open",
+        status,
+        subStatus,
+        userId,
         projectId,
       },
     });
@@ -188,4 +228,38 @@ export async function deleteSupportItemAction(id: string, returnTo?: string) {
     throw e;
   }
   redirect(resolvedReturnTo ?? "/portal/admin/support");
+}
+
+export async function convertRequestToProjectAction(id: string) {
+  await requireAdmin();
+
+  const request = await prisma.supportItem.findUnique({ where: { id } });
+  if (!request) {
+    throw new Error("Request not found.");
+  }
+
+  if (request.projectId) {
+    redirect(`/portal/admin/projects/${request.projectId}/edit`);
+  }
+
+  const project = await prisma.project.create({
+    data: {
+      name: request.title,
+      type: mapRequestCategoryToProjectType(request.category),
+      status: "New",
+      notes: `Converted from request (${request.category} / ${request.purpose})\n\n${request.detail}`,
+      userId: request.userId,
+    },
+  });
+
+  await prisma.supportItem.update({
+    where: { id: request.id },
+    data: {
+      projectId: project.id,
+      status: "Closed",
+      subStatus: "Converted to Project",
+    },
+  });
+
+  redirect(`/portal/admin/projects/${project.id}/edit`);
 }

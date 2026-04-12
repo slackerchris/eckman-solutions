@@ -32,7 +32,12 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     prisma.supportItem.findMany({
       where: isAdmin
         ? undefined
-        : { project: { userId: session.userId } },
+        : {
+            OR: [
+              { userId: session.userId },
+              { project: { userId: session.userId } },
+            ],
+          },
       orderBy: { createdAt: "desc" },
     }),
   ]);
