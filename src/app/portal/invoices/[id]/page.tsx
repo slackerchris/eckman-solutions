@@ -4,8 +4,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { requireSession } from "@/lib/auth/session";
 import { buildClientPaymentUrl } from "@/lib/client-payment";
+import {
+  getInvoiceDiscountCentsFromLineItems,
+  getInvoiceLineItemDisplayDescription,
+} from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
-import { formatCents } from "@/lib/quotes";
+import { formatCents, parseCurrencyToCents } from "@/lib/quotes";
 
 export const metadata: Metadata = { title: "Invoice Details — Portal" };
 
@@ -51,6 +55,9 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
   }
 
   const lineSubtotal = invoice.lineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
+  const invoiceDiscountCents = getInvoiceDiscountCentsFromLineItems(invoice.lineItems);
+  const invoiceTotalCents = parseCurrencyToCents(invoice.amount);
+  const invoiceSubtotalBeforeDiscountCents = invoiceTotalCents + invoiceDiscountCents;
   const statusLower = invoice.status.toLowerCase();
   const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
     invoiceId: invoice.id,
@@ -117,7 +124,7 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
             {invoice.lineItems.map((item) => (
               <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "center", borderBottom: "1px dashed var(--border)", paddingBottom: "10px" }}>
                 <div>
-                  <p style={{ fontSize: ".95rem", color: "var(--ink)" }}>{item.description}</p>
+                  <p style={{ fontSize: ".95rem", color: "var(--ink)" }}>{getInvoiceLineItemDisplayDescription(item.description)}</p>
                   <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "4px" }}>
                     {item.quantity} x {formatCents(item.unitPriceCents)}
                   </p>
@@ -150,10 +157,22 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
               </div>
             </>
           ) : (
-            <div style={{ borderTop: "1px solid var(--border)", marginTop: "2px", paddingTop: "10px", display: "flex", justifyContent: "space-between", fontWeight: 700, color: "var(--ink)" }}>
-              <span>Total</span>
-              <span>{invoice.amount}</span>
-            </div>
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: ".86rem" }}>
+                <span>{invoiceDiscountCents > 0 ? "Subtotal (before discount)" : "Subtotal"}</span>
+                <span>{formatCents(invoiceSubtotalBeforeDiscountCents)}</span>
+              </div>
+              {invoiceDiscountCents > 0 ? (
+                <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: ".86rem" }}>
+                  <span>Discount</span>
+                  <span>-{formatCents(invoiceDiscountCents)}</span>
+                </div>
+              ) : null}
+              <div style={{ borderTop: "1px solid var(--border)", marginTop: "2px", paddingTop: "10px", display: "flex", justifyContent: "space-between", fontWeight: 700, color: "var(--ink)" }}>
+                <span>Total</span>
+                <span>{formatCents(invoiceTotalCents)}</span>
+              </div>
+            </>
           )}
         </div>
       </article>

@@ -7,6 +7,11 @@ import { prisma } from "@/lib/prisma";
 import { updateInvoiceAction } from "@/app/portal/admin/actions";
 import { INVOICE_STATUSES } from "@/lib/portal-constants";
 import { inputStyle, selectStyle, labelStyle } from "@/components/form-styles";
+import {
+  getInvoiceDiscountCentsFromLineItems,
+  getInvoiceLineItemDisplayDescription,
+} from "@/lib/invoice-utils";
+import { formatCents, parseCurrencyToCents } from "@/lib/quotes";
 
 export const metadata: Metadata = { title: "Edit Invoice — Admin" };
 
@@ -24,6 +29,8 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   ]);
   if (!invoice) notFound();
 
+  const existingDiscountCents = getInvoiceDiscountCentsFromLineItems(invoice.lineItems);
+  const amountBeforeDiscountCents = parseCurrencyToCents(invoice.amount) + existingDiscountCents;
   const action = updateInvoiceAction.bind(null, invoice.id);
 
   return (
@@ -46,12 +53,18 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         </div>
         <div>
           <label htmlFor="amount" style={labelStyle}>Amount (before discount)</label>
-          <input id="amount" name="amount" required defaultValue={invoice.amount} style={inputStyle} />
+          <input id="amount" name="amount" required defaultValue={formatCents(amountBeforeDiscountCents)} style={inputStyle} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
             <label htmlFor="discount" style={labelStyle}>Discount (optional)</label>
-            <input id="discount" name="discount" style={inputStyle} placeholder="0.00 or 10" />
+            <input
+              id="discount"
+              name="discount"
+              defaultValue={existingDiscountCents > 0 ? (existingDiscountCents / 100).toFixed(2) : ""}
+              style={inputStyle}
+              placeholder="0.00 or 10"
+            />
           </div>
           <div>
             <label htmlFor="discountType" style={labelStyle}>Discount type</label>
@@ -84,12 +97,12 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
 
         {invoice.lineItems.length > 0 ? (
           <div style={{ border: "1px solid var(--border)", borderRadius: ".9rem", padding: "12px 14px", background: "var(--card)" }}>
-            <p style={{ ...labelStyle, marginBottom: "10px" }}>Line items copied from quote</p>
+            <p style={{ ...labelStyle, marginBottom: "10px" }}>Invoice line items</p>
             <div style={{ display: "grid", gap: "8px" }}>
               {invoice.lineItems.map((item) => (
                 <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: "10px", fontSize: ".86rem", color: "var(--muted)" }}>
-                  <span>{item.description} ({item.quantity} x ${(item.unitPriceCents / 100).toFixed(2)})</span>
-                  <span style={{ color: "var(--ink)", fontWeight: 600 }}>${((item.quantity * item.unitPriceCents) / 100).toFixed(2)}</span>
+                  <span>{getInvoiceLineItemDisplayDescription(item.description)} ({item.quantity} x {formatCents(item.unitPriceCents)})</span>
+                  <span style={{ color: "var(--ink)", fontWeight: 600 }}>{formatCents(item.quantity * item.unitPriceCents)}</span>
                 </div>
               ))}
             </div>

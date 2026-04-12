@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
 import { getRequestPurposeDefinition, INVOICE_STATUSES } from "@/lib/portal-constants";
 import { formatCents, parseCurrencyToCents } from "@/lib/quotes";
+import { INVOICE_DISCOUNT_LINE_DESCRIPTION } from "@/lib/invoice-utils";
 
 function normalizeSupportCategory(input: string | null | undefined): string {
   const category = (input ?? "").trim();
@@ -28,21 +29,25 @@ function computeDiscountedAmount(
   amountInput: string,
   discountInput: string,
   discountTypeInput: string,
-): string {
+): { finalAmount: string; effectiveDiscountCents: number } {
   const amountCents = parseCurrencyToCents(amountInput);
   const hasDiscount = discountInput.trim().length > 0;
 
   if (!hasDiscount) {
-    return formatCents(amountCents);
+    return { finalAmount: formatCents(amountCents), effectiveDiscountCents: 0 };
   }
 
   const discountType = discountTypeInput.trim().toUpperCase();
-  const discountCents =
+  const requestedDiscountCents =
     discountType === "PERCENT"
       ? Math.round(amountCents * (parsePercentage(discountInput) / 100))
       : parseCurrencyToCents(discountInput);
+  const effectiveDiscountCents = Math.min(requestedDiscountCents, amountCents);
 
-  return formatCents(Math.max(0, amountCents - discountCents));
+  return {
+    finalAmount: formatCents(Math.max(0, amountCents - effectiveDiscountCents)),
+    effectiveDiscountCents,
+  };
 }
 
 function mapRequestCategoryToProjectType(category: string): string {
@@ -142,16 +147,30 @@ export async function createInvoiceAction(formData: FormData) {
   const amountInput = String(formData.get("amount") ?? "").trim();
   const discountInput = String(formData.get("discount") ?? "").trim();
   const discountTypeInput = String(formData.get("discountType") ?? "AMOUNT").trim();
-  const amount = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
+  const { finalAmount, effectiveDiscountCents } = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
   try {
-    await prisma.invoice.create({
-      data: {
-        label: String(formData.get("label") ?? "").trim(),
-        workstream,
-        amount,
-        status: String(formData.get("status") ?? "").trim(),
-        projectId,
-      },
+    await prisma.$transaction(async (tx) => {
+      const invoice = await tx.invoice.create({
+        data: {
+          label: String(formData.get("label") ?? "").trim(),
+          workstream,
+          amount: finalAmount,
+          status: String(formData.get("status") ?? "").trim(),
+          projectId,
+        },
+      });
+
+      if (effectiveDiscountCents > 0) {
+        await tx.invoiceLineItem.create({
+          data: {
+            invoiceId: invoice.id,
+            description: INVOICE_DISCOUNT_LINE_DESCRIPTION,
+            quantity: 1,
+            unitPriceCents: -effectiveDiscountCents,
+            position: 9999,
+          },
+        });
+      }
     });
   } catch (e) {
     console.error("createInvoiceAction failed:", e);
@@ -167,17 +186,38 @@ export async function updateInvoiceAction(id: string, formData: FormData) {
   const amountInput = String(formData.get("amount") ?? "").trim();
   const discountInput = String(formData.get("discount") ?? "").trim();
   const discountTypeInput = String(formData.get("discountType") ?? "AMOUNT").trim();
-  const amount = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
+  const { finalAmount, effectiveDiscountCents } = computeDiscountedAmount(amountInput, discountInput, discountTypeInput);
   try {
-    await prisma.invoice.update({
-      where: { id },
-      data: {
-        label: String(formData.get("label") ?? "").trim(),
-        workstream,
-        amount,
-        status: String(formData.get("status") ?? "").trim(),
-        projectId,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.invoice.update({
+        where: { id },
+        data: {
+          label: String(formData.get("label") ?? "").trim(),
+          workstream,
+          amount: finalAmount,
+          status: String(formData.get("status") ?? "").trim(),
+          projectId,
+        },
+      });
+
+      await tx.invoiceLineItem.deleteMany({
+        where: {
+          invoiceId: id,
+          description: INVOICE_DISCOUNT_LINE_DESCRIPTION,
+        },
+      });
+
+      if (effectiveDiscountCents > 0) {
+        await tx.invoiceLineItem.create({
+          data: {
+            invoiceId: id,
+            description: INVOICE_DISCOUNT_LINE_DESCRIPTION,
+            quantity: 1,
+            unitPriceCents: -effectiveDiscountCents,
+            position: 9999,
+          },
+        });
+      }
     });
   } catch (e) {
     console.error("updateInvoiceAction failed:", e);

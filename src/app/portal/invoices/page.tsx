@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { requireSession } from "@/lib/auth/session";
 import { buildClientPaymentUrl } from "@/lib/client-payment";
+import { isInvoiceDiscountLine } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Invoices — Eckman Solutions Portal" };
@@ -17,21 +19,23 @@ export default async function ClientInvoicesPage({
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
+  if (isAdmin) {
+    redirect("/portal/admin/invoices");
+  }
+
   const invoices = await prisma.invoice.findMany({
-    where: isAdmin
-      ? undefined
-      : {
-          status: { notIn: ["Draft", "draft"] },
-          OR: [
-            { project: { userId: session.userId } },
-            { quote: { userId: session.userId } },
-          ],
-        },
+    where: {
+      status: { notIn: ["Draft", "draft"] },
+      OR: [
+        { project: { userId: session.userId } },
+        { quote: { userId: session.userId } },
+      ],
+    },
     orderBy: { createdAt: "desc" },
     include: {
       project: { select: { name: true } },
       quote: { select: { id: true } },
-      lineItems: { select: { id: true } },
+      lineItems: { select: { id: true, description: true } },
     },
   });
 
@@ -83,6 +87,7 @@ export default async function ClientInvoicesPage({
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {invoices.map((inv) => {
+            const visibleLineItemCount = inv.lineItems.filter((item) => !isInvoiceDiscountLine(item)).length;
             const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
               invoiceId: inv.id,
               amount: inv.amount,
@@ -106,7 +111,7 @@ export default async function ClientInvoicesPage({
                   <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "2px" }}>Workstream: {inv.workstream}</p>
                 )}
                 <p style={{ marginTop: "4px", fontSize: ".76rem", color: "var(--muted)" }}>
-                  {inv.lineItems.length} item{inv.lineItems.length !== 1 ? "s" : ""}
+                  {visibleLineItemCount} item{visibleLineItemCount !== 1 ? "s" : ""}
                 </p>
                 {!isAdmin && (
                   <Link href={`/portal/invoices/${inv.id}`} style={{ marginTop: "6px", display: "inline-block", fontSize: ".78rem", color: "var(--accent)", textDecoration: "none" }}>

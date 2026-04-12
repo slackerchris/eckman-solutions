@@ -15,7 +15,8 @@ export function parseCurrencyToCents(input: string): number {
 }
 
 export function formatCents(cents: number): string {
-  return `$${(Math.max(0, cents) / 100).toFixed(2)}`;
+  const sign = cents < 0 ? "-" : "";
+  return `${sign}$${(Math.abs(cents) / 100).toFixed(2)}`;
 }
 
 export function parseLineItemsText(text: string): ParsedQuoteLineItem[] {
