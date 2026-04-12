@@ -55,6 +55,7 @@ export async function acceptQuoteAction(id: string) {
         const createdInvoice = await tx.invoice.create({
           data: {
             label: `Quote: ${quote.label}`,
+            workstream: quote.workstream,
             amount: formatCents(quote.totalCents),
             status: "Draft",
             projectId: quote.projectId,

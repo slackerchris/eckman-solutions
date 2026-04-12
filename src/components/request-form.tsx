@@ -45,11 +45,11 @@ const CATEGORIES = [
   { value: "Not sure yet",    label: "Not sure yet" },
 ] as const;
 
-const PURPOSES = [
-  { value: "New Project",      label: "New project" },
-  { value: "Change Request",   label: "Change request (add to an existing project)" },
-  { value: "Support Ticket",   label: "Support ticket (fix/help on existing project)" },
-  { value: "General Question", label: "General question" },
+const PURPOSE_OPTIONS = [
+  { value: "NEW_PROJECT", label: "New project" },
+  { value: "CHANGE_REQUEST", label: "Change request (add to an existing project)" },
+  { value: "SUPPORT_TICKET", label: "Support ticket (fix/help on existing project)" },
+  { value: "GENERAL_QUESTION", label: "General question" },
 ] as const;
 
 type Project = { id: string; name: string };
@@ -71,8 +71,8 @@ export function RequestForm({
   const [category, setCategory] = useState<string>(
     defaultProjectId ? "Not sure yet" : "",
   );
-  const [purpose, setPurpose] = useState<string>(
-    defaultProjectId ? "Change Request" : "",
+  const [purposeId, setPurposeId] = useState<string>(
+    defaultProjectId ? "CHANGE_REQUEST" : "",
   );
 
   return (
@@ -106,14 +106,14 @@ export function RequestForm({
         <label htmlFor="purpose" style={labelStyle}>Request purpose</label>
         <select
           id="purpose"
-          name="purpose"
+          name="purposeId"
           required
           style={selectStyle}
-          value={purpose}
-          onChange={(e) => setPurpose(e.target.value)}
+          value={purposeId}
+          onChange={(e) => setPurposeId(e.target.value)}
         >
           <option value="" disabled>— Select purpose —</option>
-          {PURPOSES.map((p) => (
+          {PURPOSE_OPTIONS.map((p) => (
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </select>
@@ -196,9 +196,9 @@ export function RequestForm({
       <div style={{ paddingTop: "4px" }}>
         <button
           type="submit"
-          disabled={pending || !category || !purpose}
+          disabled={pending || !category || !purposeId}
           className="btn-primary"
-          style={{ borderRadius: "999px", padding: "10px 28px", fontSize: ".875rem", opacity: (pending || !category || !purpose) ? 0.5 : 1, cursor: (!category || !purpose) ? "not-allowed" : "pointer" }}
+          style={{ borderRadius: "999px", padding: "10px 28px", fontSize: ".875rem", opacity: (pending || !category || !purposeId) ? 0.5 : 1, cursor: (!category || !purposeId) ? "not-allowed" : "pointer" }}
         >
           {pending ? "Submitting…" : "Submit request"}
         </button>

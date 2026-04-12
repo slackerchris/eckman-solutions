@@ -90,6 +90,9 @@ export default async function ClientInvoicesPage({
                 {inv.project && (
                   <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "2px" }}>{inv.project.name}</p>
                 )}
+                {inv.workstream && (
+                  <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "2px" }}>Workstream: {inv.workstream}</p>
+                )}
                 <p style={{ marginTop: "4px", fontSize: ".76rem", color: "var(--muted)" }}>
                   {inv.lineItems.length} item{inv.lineItems.length !== 1 ? "s" : ""}
                 </p>

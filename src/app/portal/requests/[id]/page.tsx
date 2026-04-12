@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Request Details — Portal" };
 
@@ -21,6 +22,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   if (!item) notFound();
 
+  const purposeDef = getRequestPurposeDefinition(item.purposeId, item.purpose);
+  const queueCategory = (item.queueCategory ?? purposeDef.queueCategory).trim().toUpperCase();
+
   if (!isAdmin) {
     const ownsByProject = Boolean(item.project && item.project.userId === session.userId);
     const ownsByRequest = item.userId === session.userId;
@@ -32,10 +36,22 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   return (
     <section style={{ maxWidth: "760px" }}>
       <Link
-        href={isAdmin ? (item.projectId ? "/portal/admin/support" : "/portal/admin/requests") : (item.projectId ? "/portal/projects" : "/portal")}
+        href={isAdmin
+          ? queueCategory === "CHANGE"
+            ? "/portal/admin/changes"
+            : queueCategory === "SUPPORT"
+              ? "/portal/admin/support"
+              : "/portal/admin/requests"
+          : (item.projectId ? "/portal/projects" : "/portal")}
         style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}
       >
-        ← {isAdmin ? "Queue" : (item.projectId ? "Projects" : "Dashboard")}
+        ← {isAdmin
+          ? queueCategory === "CHANGE"
+            ? "Change queue"
+            : queueCategory === "SUPPORT"
+              ? "Support queue"
+              : "Request queue"
+          : (item.projectId ? "Projects" : "Dashboard")}
       </Link>
 
       <h2
@@ -49,7 +65,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           {item.status ?? "Open"}
         </span>
         <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "4px 12px", fontSize: ".75rem", color: "var(--muted)" }}>
-          {item.purpose ?? "General Question"}
+          {purposeDef.label}
         </span>
         <span style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "4px 12px", fontSize: ".75rem", color: "var(--muted)" }}>
           {item.category ?? "General"}

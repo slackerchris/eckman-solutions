@@ -63,6 +63,7 @@ export default async function ClientQuoteDetailPage({
         <span>Issued {quote.createdAt.toLocaleDateString()}</span>
         {quote.validUntil ? <span>• Valid until {quote.validUntil.toLocaleDateString()}</span> : null}
         {quote.project ? <span>• Project: {quote.project.name}</span> : null}
+        {quote.workstream ? <span>• Workstream: {quote.workstream}</span> : null}
         {quote.user ? <span>• Client: {quote.user.name}</span> : null}
       </div>
 

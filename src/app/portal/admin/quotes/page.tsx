@@ -81,6 +81,7 @@ export default async function AdminQuotesPage({
                 <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "6px" }}>
                   {quote.user ? `Client: ${quote.user.name}` : "No client linked"}
                   {quote.project ? ` • Project: ${quote.project.name}` : ""}
+                  {quote.workstream ? ` • Workstream: ${quote.workstream}` : ""}
                   {quote.invoices.length > 0 ? " • Invoice created" : ""}
                 </p>
                 {quote.publicToken ? (

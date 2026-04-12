@@ -55,6 +55,7 @@ export default async function ClientQuotesPage() {
                   <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{quote.label}</p>
                   <p style={{ fontSize: ".82rem", color: "var(--muted)", marginTop: "4px" }}>
                     {quote.project ? `Project: ${quote.project.name}` : "General quote"}
+                    {quote.workstream ? ` • Workstream: ${quote.workstream}` : ""}
                     {quote.validUntil ? ` • Valid until ${quote.validUntil.toLocaleDateString()}` : ""}
                   </p>
                 </div>

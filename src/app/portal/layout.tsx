@@ -52,6 +52,11 @@ export default async function PortalLayout({
                   Invoices
                 </Link>
               ) : null}
+              {session && session.role !== "ADMIN" ? (
+                <Link href="/portal/quotes" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                  Quotes
+                </Link>
+              ) : null}
 
               {session ? (
                 <Link
@@ -68,9 +73,11 @@ export default async function PortalLayout({
                     More
                   </summary>
                   <div style={{ position: "absolute", right: 0, marginTop: "6px", minWidth: "180px", background: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px", padding: "8px", display: "grid", gap: "4px", zIndex: 30 }}>
-                    <Link href={session.role === "ADMIN" ? "/portal/admin/quotes" : "/portal/quotes"} style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
-                      Quotes
-                    </Link>
+                    {session.role === "ADMIN" ? (
+                      <Link href="/portal/admin/quotes" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
+                        Quotes
+                      </Link>
+                    ) : null}
                     <Link href="/portal/profile" style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}>
                       Profile
                     </Link>

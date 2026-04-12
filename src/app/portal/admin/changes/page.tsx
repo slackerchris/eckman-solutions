@@ -5,15 +5,22 @@ import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { deleteSupportItemAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Change Queue — Admin" };
+
+const CHANGE_REQUEST_PURPOSE_LABELS = ["Change Request", "Change request", "change request"];
 
 export default async function AdminChangesPage() {
   await requireAdmin();
   const items = await prisma.supportItem.findMany({
     where: {
       projectId: { not: null },
-      purpose: "Change Request",
+      OR: [
+        { queueCategory: "CHANGE" },
+        { purposeId: "CHANGE_REQUEST" },
+        { purpose: { in: CHANGE_REQUEST_PURPOSE_LABELS } },
+      ],
     },
     orderBy: { createdAt: "desc" },
     include: { project: { select: { name: true } } },
@@ -43,41 +50,44 @@ export default async function AdminChangesPage() {
         <p style={{ color: "var(--muted)", fontSize: ".95rem" }}>No change requests yet.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {items.map((item) => (
-            <article
-              key={item.id}
-              style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}
-            >
-              <div>
-                <p style={{ fontFamily: "monospace", fontSize: ".68rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", marginBottom: "4px" }}>
-                  {item.category ?? "General"}_
-                  <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.status}</span>
-                  <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.purpose}</span>
-                </p>
-                <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</p>
-                {item.project && (
-                  <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "4px" }}>Project: {item.project.name}</p>
-                )}
-                <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
-                {item.subStatus ? (
-                  <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "6px" }}>Sub-status: {item.subStatus}</p>
-                ) : null}
-              </div>
-              <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                <Link
-                  href={`/portal/admin/support/${item.id}/edit`}
-                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}
-                >
-                  Edit
-                </Link>
-                <ConfirmDeleteButton
-                  action={deleteSupportItemAction.bind(null, item.id, "/portal/admin/changes")}
-                  message="Delete this change request?"
-                  style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
-                />
-              </div>
-            </article>
-          ))}
+          {items.map((item) => {
+            const purposeDef = getRequestPurposeDefinition(item.purposeId, item.purpose);
+            return (
+              <article
+                key={item.id}
+                style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 24px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}
+              >
+                <div>
+                  <p style={{ fontFamily: "monospace", fontSize: ".68rem", textTransform: "uppercase", letterSpacing: ".14em", color: "var(--accent)", marginBottom: "4px" }}>
+                    {item.category ?? "General"}_
+                    <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{item.status}</span>
+                    <span style={{ marginLeft: "8px", color: "var(--muted)", letterSpacing: ".1em" }}>{purposeDef.label}</span>
+                  </p>
+                  <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--ink)" }}>{item.title}</p>
+                  {item.project && (
+                    <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "4px" }}>Project: {item.project.name}</p>
+                  )}
+                  <p style={{ fontSize: ".875rem", color: "var(--muted)", marginTop: "6px", lineHeight: 1.6 }}>{item.detail}</p>
+                  {item.subStatus ? (
+                    <p style={{ fontSize: ".78rem", color: "var(--muted)", marginTop: "6px" }}>Sub-status: {item.subStatus}</p>
+                  ) : null}
+                </div>
+                <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                  <Link
+                    href={`/portal/admin/support/${item.id}/edit`}
+                    style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", textDecoration: "none" }}
+                  >
+                    Edit
+                  </Link>
+                  <ConfirmDeleteButton
+                    action={deleteSupportItemAction.bind(null, item.id, "/portal/admin/changes")}
+                    message="Delete this change request?"
+                    style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 16px", fontSize: ".8rem", color: "var(--muted)", background: "transparent", cursor: "pointer" }}
+                  />
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>

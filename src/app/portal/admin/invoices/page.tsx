@@ -53,6 +53,7 @@ export default async function AdminInvoicesPage() {
                   {inv.amount} &mdash; <span style={{ color: "var(--accent)" }}>{inv.status}</span>
                 </p>
                 <p style={{ marginTop: "4px", fontSize: ".76rem", color: "var(--muted)" }}>
+                  {inv.workstream ? `Workstream: ${inv.workstream} • ` : ""}
                   {inv.lineItems.length} item{inv.lineItems.length !== 1 ? "s" : ""}
                   {inv.quote ? " • from quote" : ""}
                 </p>

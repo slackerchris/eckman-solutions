@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { updateSupportItemAction } from "@/app/portal/admin/actions";
-import { REQUEST_PURPOSES, SUPPORT_CLOSED_SUB_STATUSES, SUPPORT_ON_HOLD_SUB_STATUSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
+import { REQUEST_PURPOSE_DEFINITIONS, getRequestPurposeDefinition, SUPPORT_CLOSED_SUB_STATUSES, SUPPORT_ON_HOLD_SUB_STATUSES, SUPPORT_STATUSES } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Edit Support Item — Admin" };
 
@@ -51,11 +51,18 @@ export default async function EditSupportItemPage({ params }: { params: Promise<
   if (!item) notFound();
 
   const action = updateSupportItemAction.bind(null, item.id);
+  const purposeDef = getRequestPurposeDefinition(item.purposeId, item.purpose);
+  const queueCategory = (item.queueCategory ?? purposeDef.queueCategory).trim().toUpperCase();
+  const backHref = queueCategory === "CHANGE"
+    ? "/portal/admin/changes"
+    : queueCategory === "REQUEST"
+      ? "/portal/admin/requests"
+      : "/portal/admin/support";
 
   return (
     <section style={{ maxWidth: "560px" }}>
-      <Link href="/portal/admin/support" style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
-        ← Support items
+      <Link href={backHref} style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)" }}>
+        ← Queue items
       </Link>
       <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 700, letterSpacing: "-.04em", color: "var(--ink)", marginTop: "6px", marginBottom: "28px" }}>
         Edit support item
@@ -101,13 +108,10 @@ export default async function EditSupportItemPage({ params }: { params: Promise<
           </select>
         </div>
         <div>
-          <label htmlFor="purpose" style={labelStyle}>Purpose</label>
-          <select id="purpose" name="purpose" required defaultValue={item.purpose ?? "Support Ticket"} style={selectStyle}>
-            {!REQUEST_PURPOSES.includes((item.purpose ?? "Support Ticket") as (typeof REQUEST_PURPOSES)[number]) && (
-              <option value={item.purpose ?? "Support Ticket"}>{item.purpose ?? "Support Ticket"}</option>
-            )}
-            {REQUEST_PURPOSES.map((p) => (
-              <option key={p} value={p}>{p}</option>
+          <label htmlFor="purposeId" style={labelStyle}>Purpose</label>
+          <select id="purposeId" name="purposeId" required defaultValue={purposeDef.id} style={selectStyle}>
+            {REQUEST_PURPOSE_DEFINITIONS.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
             ))}
           </select>
         </div>

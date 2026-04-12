@@ -86,6 +86,11 @@ export default async function NewQuotePage({
           <input id="label" name="label" required style={inputStyle} placeholder="Website redesign and analytics setup" />
         </div>
 
+        <div>
+          <label htmlFor="workstream" style={labelStyle}>Workstream (optional)</label>
+          <input id="workstream" name="workstream" style={inputStyle} placeholder="Website" />
+        </div>
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
             <label htmlFor="status" style={labelStyle}>Status</label>

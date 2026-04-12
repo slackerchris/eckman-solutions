@@ -66,6 +66,7 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
       <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "16px", color: "var(--muted)", fontSize: ".85rem" }}>
         <span>Issued {invoice.createdAt.toLocaleDateString()}</span>
         {invoice.project ? <span>• Project: {invoice.project.name}</span> : null}
+        {invoice.workstream ? <span>• Workstream: {invoice.workstream}</span> : null}
         {invoice.quote ? (
           <Link href={`/portal/quotes/${invoice.quote.id}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
             View quote

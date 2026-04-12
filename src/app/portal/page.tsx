@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 export const metadata: Metadata = {
   title: "Client Portal",
@@ -16,7 +17,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const session = await requireSession();
   const isAdmin = session.role === "ADMIN";
 
-  const [projects, invoices, workItems] = await Promise.all([
+  const [projects, invoices, quotes, workItems] = await Promise.all([
     prisma.project.findMany({
       where: isAdmin ? undefined : { userId: session.userId },
       orderBy: { createdAt: "desc" },
@@ -37,6 +38,17 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       orderBy: { createdAt: "desc" },
       include: { project: { select: { name: true } } },
     }),
+    prisma.quote.findMany({
+      where: isAdmin
+        ? undefined
+        : {
+            OR: [
+              { userId: session.userId },
+              { project: { userId: session.userId } },
+            ],
+          },
+      select: { id: true, status: true },
+    }),
     prisma.supportItem.findMany({
       where: isAdmin
         ? undefined
@@ -51,13 +63,24 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   ]);
 
   const requestQueueItems = isAdmin
-    ? workItems.filter((item) => !item.projectId)
+    ? workItems.filter((item) => {
+        const purposeDef = getRequestPurposeDefinition(item.purposeId, item.purpose);
+        return !item.projectId || purposeDef.queueCategory === "REQUEST";
+      })
     : [];
   const changeQueueItems = isAdmin
-    ? workItems.filter((item) => Boolean(item.projectId) && item.purpose === "Change Request")
+    ? workItems.filter(
+        (item) =>
+          Boolean(item.projectId) &&
+          getRequestPurposeDefinition(item.purposeId, item.purpose).queueCategory === "CHANGE",
+      )
     : [];
   const supportQueueItems = isAdmin
-    ? workItems.filter((item) => Boolean(item.projectId) && item.purpose !== "Change Request")
+    ? workItems.filter(
+        (item) =>
+          Boolean(item.projectId) &&
+          getRequestPurposeDefinition(item.purposeId, item.purpose).queueCategory === "SUPPORT",
+      )
     : workItems;
 
   const activeProjects = projects.filter(
@@ -66,6 +89,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
 
   const invoicesAwaitingPayment = invoices.filter((i) => ["sent", "overdue"].includes(i.status.toLowerCase())).length;
   const invoicesAwaitingAdmin = invoices.filter((i) => i.status.toLowerCase() === "draft").length;
+  const quotesAwaitingApproval = quotes.filter(
+    (q) => !["accepted", "converted", "rejected", "expired"].includes(q.status.toLowerCase()),
+  ).length;
 
   const stats = isAdmin
     ? [
@@ -107,6 +133,11 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           href: "/portal/invoices",
         },
         {
+          label: "Quotes",
+          value: quotes.length.toString().padStart(2, "0"),
+          href: "/portal/quotes",
+        },
+        {
           label: "Support items",
           value: supportQueueItems.length.toString().padStart(2, "0"),
           href: "/portal/requests/new",
@@ -130,6 +161,17 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               : `You have ${invoicesAwaitingAdmin} invoice${invoicesAwaitingAdmin !== 1 ? "s" : ""} in draft while we finalize details.`}{" "}
             <Link href="/portal/invoices" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "none" }}>
               View invoices
+            </Link>
+          </p>
+        </div>
+      )}
+
+      {!isAdmin && quotesAwaitingApproval > 0 && (
+        <div style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)", borderRadius: "1rem", padding: "14px 20px", fontSize: ".875rem", color: "var(--ink)" }}>
+          <p style={{ margin: 0 }}>
+            You have {quotesAwaitingApproval} quote{quotesAwaitingApproval !== 1 ? "s" : ""} awaiting approval. {" "}
+            <Link href="/portal/quotes" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "none" }}>
+              Review quotes
             </Link>
           </p>
         </div>
@@ -181,13 +223,19 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               >
                 My invoices
               </Link>
+              <Link
+                href="/portal/quotes"
+                style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "8px 20px", fontSize: ".875rem", color: "var(--muted)", textDecoration: "none" }}
+              >
+                My quotes
+              </Link>
             </div>
           )}
         </div>
       </article>
 
       {/* Stat cards */}
-      <section className={`grid gap-5 md:grid-cols-2 ${isAdmin ? "xl:grid-cols-5" : "xl:grid-cols-3"}`}>
+      <section className={`grid gap-5 md:grid-cols-2 ${isAdmin ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>
         {stats.map((item) => {
           const inner = (
             <>

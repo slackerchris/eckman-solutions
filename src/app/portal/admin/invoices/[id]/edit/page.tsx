@@ -72,6 +72,10 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
           <input id="label" name="label" required defaultValue={invoice.label} style={inputStyle} />
         </div>
         <div>
+          <label htmlFor="workstream" style={labelStyle}>Workstream (optional)</label>
+          <input id="workstream" name="workstream" defaultValue={invoice.workstream} style={inputStyle} placeholder="Website" />
+        </div>
+        <div>
           <label htmlFor="amount" style={labelStyle}>Amount</label>
           <input id="amount" name="amount" required defaultValue={invoice.amount} style={inputStyle} />
         </div>

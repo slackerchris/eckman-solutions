@@ -62,6 +62,10 @@ export default async function NewInvoicePage() {
           <input id="label" name="label" required style={inputStyle} placeholder="Website design and launch" />
         </div>
         <div>
+          <label htmlFor="workstream" style={labelStyle}>Workstream (optional)</label>
+          <input id="workstream" name="workstream" style={inputStyle} placeholder="Website" />
+        </div>
+        <div>
           <label htmlFor="amount" style={labelStyle}>Amount</label>
           <input id="amount" name="amount" required style={inputStyle} placeholder="$1,400" />
         </div>

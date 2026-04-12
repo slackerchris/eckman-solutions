@@ -103,6 +103,11 @@ export default async function EditQuotePage({
           <input id="label" name="label" required defaultValue={quote.label} style={inputStyle} />
         </div>
 
+        <div>
+          <label htmlFor="workstream" style={labelStyle}>Workstream (optional)</label>
+          <input id="workstream" name="workstream" defaultValue={quote.workstream} style={inputStyle} placeholder="Website" />
+        </div>
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "14px" }}>
           <div>
             <label htmlFor="status" style={labelStyle}>Status</label>

@@ -56,6 +56,7 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
           {quote.validUntil ? <span>• Valid until {quote.validUntil.toLocaleDateString()}</span> : null}
           {quote.user ? <span>• For {quote.user.name}</span> : null}
           {quote.project ? <span>• Project: {quote.project.name}</span> : null}
+          {quote.workstream ? <span>• Workstream: {quote.workstream}</span> : null}
         </div>
 
         {isExpired ? (

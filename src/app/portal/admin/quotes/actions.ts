@@ -73,6 +73,7 @@ function parsePercentage(input: string): number {
 
 function parseQuoteForm(formData: FormData) {
   const label = String(formData.get("label") ?? "").trim();
+  const workstream = String(formData.get("workstream") ?? "").trim();
   const status = String(formData.get("status") ?? "Draft").trim() || "Draft";
   const notes = String(formData.get("notes") ?? "").trim();
   const userId = String(formData.get("userId") ?? "").trim() || null;
@@ -97,6 +98,7 @@ function parseQuoteForm(formData: FormData) {
 
   return {
     label,
+    workstream,
     status,
     notes,
     userId,
@@ -119,6 +121,7 @@ export async function createQuoteAction(formData: FormData) {
     await prisma.quote.create({
       data: {
         label: parsed.label,
+        workstream: parsed.workstream,
         status: parsed.status,
         notes: parsed.notes,
         userId: parsed.userId,
@@ -156,6 +159,7 @@ export async function updateQuoteAction(id: string, formData: FormData) {
       where: { id },
       data: {
         label: parsed.label,
+        workstream: parsed.workstream,
         status: parsed.status,
         notes: parsed.notes,
         userId: parsed.userId,
@@ -298,6 +302,7 @@ export async function convertQuoteToInvoiceAction(id: string) {
   const invoice = await prisma.invoice.create({
     data: {
       label: `Quote: ${quote.label}`,
+      workstream: quote.workstream,
       amount: formatCents(quote.totalCents),
       status: "Draft",
       projectId: quote.projectId,

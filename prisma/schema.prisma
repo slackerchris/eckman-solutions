@@ -47,6 +47,7 @@ model Project {
 model Invoice {
   id        String   @id @default(cuid())
   label     String
+  workstream String  @default("")
   amount    String
   status    String
   projectId String?
@@ -73,6 +74,7 @@ model InvoiceLineItem {
 model Quote {
   id            String          @id @default(cuid())
   label         String
+  workstream    String          @default("")
   status        String          @default("Draft")
   notes         String          @default("")
   publicToken   String?         @unique
@@ -110,6 +112,8 @@ model SupportItem {
   detail    String
   category  String   @default("General")
   purpose   String   @default("Support Ticket")
+  purposeId String?
+  queueCategory String?
   status    String   @default("Open")
   subStatus String   @default("")
   userId    String?

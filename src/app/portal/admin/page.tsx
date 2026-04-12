@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 export const metadata: Metadata = {
   title: "Admin — Eckman Solutions Portal",
@@ -11,16 +12,34 @@ export const metadata: Metadata = {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [projectCount, quoteCount, invoiceCount, requestCount, changeCount, supportCount, unusedInviteCount, userCount] = await Promise.all([
+  const [projectCount, quoteCount, invoiceCount, supportItems, unusedInviteCount, userCount] = await Promise.all([
     prisma.project.count(),
     prisma.quote.count(),
     prisma.invoice.count(),
-    prisma.supportItem.count({ where: { projectId: null } }),
-    prisma.supportItem.count({ where: { projectId: { not: null }, purpose: "Change Request" } }),
-    prisma.supportItem.count({ where: { projectId: { not: null }, purpose: { not: "Change Request" } } }),
+    prisma.supportItem.findMany({
+      select: {
+        projectId: true,
+        purposeId: true,
+        purpose: true,
+        queueCategory: true,
+      },
+    }),
     prisma.invite.count({ where: { usedAt: null } }),
     prisma.user.count({ where: { role: "CLIENT" } }),
   ]);
+
+  const classified = supportItems.map((item) => {
+    const fallback = getRequestPurposeDefinition(item.purposeId, item.purpose).queueCategory;
+    const queueCategory = (item.queueCategory ?? fallback).trim().toUpperCase();
+    return {
+      projectId: item.projectId,
+      queueCategory,
+    };
+  });
+
+  const requestCount = classified.filter((item) => !item.projectId || item.queueCategory === "REQUEST").length;
+  const changeCount = classified.filter((item) => Boolean(item.projectId) && item.queueCategory === "CHANGE").length;
+  const supportCount = classified.filter((item) => Boolean(item.projectId) && item.queueCategory === "SUPPORT").length;
 
   const sections = [
     { label: "Users", href: "/portal/admin/users", count: userCount, description: "Manage client accounts — reset passwords, disable or remove users." },

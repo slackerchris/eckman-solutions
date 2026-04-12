@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/session";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 function mapRequestCategoryToProjectType(category: string): string {
   switch (category) {
@@ -22,6 +23,19 @@ function mapRequestCategoryToProjectType(category: string): string {
     default:
       return "Other";
   }
+}
+
+function getAdminQueueRoute(
+  queueCategory: string | null | undefined,
+  projectId: string | null,
+): string {
+  const normalizedCategory = (queueCategory ?? "").trim().toUpperCase();
+
+  if (normalizedCategory === "REQUEST") return "/portal/admin/requests";
+  if (!projectId) return "/portal/admin/requests";
+  if (normalizedCategory === "CHANGE") return "/portal/admin/changes";
+  if (normalizedCategory === "SUPPORT") return "/portal/admin/support";
+  return "/portal/admin/requests";
 }
 
 // ─── Projects ────────────────────────────────────────────────────────────────
@@ -85,10 +99,12 @@ export async function deleteProjectAction(id: string) {
 export async function createInvoiceAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const workstream = String(formData.get("workstream") ?? "").trim();
   try {
     await prisma.invoice.create({
       data: {
         label: String(formData.get("label") ?? "").trim(),
+        workstream,
         amount: String(formData.get("amount") ?? "").trim(),
         status: String(formData.get("status") ?? "").trim(),
         projectId,
@@ -104,11 +120,13 @@ export async function createInvoiceAction(formData: FormData) {
 export async function updateInvoiceAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
+  const workstream = String(formData.get("workstream") ?? "").trim();
   try {
     await prisma.invoice.update({
       where: { id },
       data: {
         label: String(formData.get("label") ?? "").trim(),
+        workstream,
         amount: String(formData.get("amount") ?? "").trim(),
         status: String(formData.get("status") ?? "").trim(),
         projectId,
@@ -137,7 +155,9 @@ export async function deleteInvoiceAction(id: string) {
 export async function createSupportItemAction(formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
-  const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const purposeInput = String(formData.get("purpose") ?? "").trim();
+  const purposeIdInput = String(formData.get("purposeId") ?? "").trim();
+  const purposeDef = getRequestPurposeDefinition(purposeIdInput, purposeInput);
   const status = String(formData.get("status") ?? "Open").trim() || "Open";
   const subStatusRaw = String(formData.get("subStatus") ?? "").trim();
   const subStatus = status === "Closed" || status === "On Hold" ? subStatusRaw : "";
@@ -146,17 +166,15 @@ export async function createSupportItemAction(formData: FormData) {
     const project = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } });
     userId = project?.userId ?? null;
   }
-  const returnTo = !projectId
-    ? "/portal/admin/requests"
-    : purpose === "Change Request"
-      ? "/portal/admin/changes"
-      : "/portal/admin/support";
+  const returnTo = getAdminQueueRoute(purposeDef.queueCategory, projectId);
   try {
     await prisma.supportItem.create({
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
-        purpose,
+        purpose: purposeDef.label,
+        purposeId: purposeDef.id,
+        queueCategory: purposeDef.queueCategory,
         status,
         subStatus,
         userId,
@@ -173,7 +191,9 @@ export async function createSupportItemAction(formData: FormData) {
 export async function updateSupportItemAction(id: string, formData: FormData) {
   await requireAdmin();
   const projectId = String(formData.get("projectId") ?? "").trim() || null;
-  const purpose = String(formData.get("purpose") ?? "Support Ticket").trim() || "Support Ticket";
+  const purposeInput = String(formData.get("purpose") ?? "").trim();
+  const purposeIdInput = String(formData.get("purposeId") ?? "").trim();
+  const purposeDef = getRequestPurposeDefinition(purposeIdInput, purposeInput);
   const status = String(formData.get("status") ?? "Open").trim() || "Open";
   const subStatusRaw = String(formData.get("subStatus") ?? "").trim();
   const subStatus = status === "Closed" || status === "On Hold" ? subStatusRaw : "";
@@ -183,18 +203,16 @@ export async function updateSupportItemAction(id: string, formData: FormData) {
     const project = await prisma.project.findUnique({ where: { id: projectId }, select: { userId: true } });
     userId = project?.userId ?? userId;
   }
-  const returnTo = !projectId
-    ? "/portal/admin/requests"
-    : purpose === "Change Request"
-      ? "/portal/admin/changes"
-      : "/portal/admin/support";
+  const returnTo = getAdminQueueRoute(purposeDef.queueCategory, projectId);
   try {
     await prisma.supportItem.update({
       where: { id },
       data: {
         title: String(formData.get("title") ?? "").trim(),
         detail: String(formData.get("detail") ?? "").trim(),
-        purpose,
+        purpose: purposeDef.label,
+        purposeId: purposeDef.id,
+        queueCategory: purposeDef.queueCategory,
         status,
         subStatus,
         userId,
@@ -215,11 +233,8 @@ export async function deleteSupportItemAction(id: string, returnTo?: string) {
     if (!resolvedReturnTo) {
       const existing = await prisma.supportItem.findUnique({ where: { id } });
       if (existing) {
-        resolvedReturnTo = !existing.projectId
-          ? "/portal/admin/requests"
-          : existing.purpose === "Change Request"
-            ? "/portal/admin/changes"
-            : "/portal/admin/support";
+        const purposeDef = getRequestPurposeDefinition(existing.purposeId, existing.purpose);
+        resolvedReturnTo = getAdminQueueRoute(existing.queueCategory ?? purposeDef.queueCategory, existing.projectId);
       }
     }
     await prisma.supportItem.delete({ where: { id } });
