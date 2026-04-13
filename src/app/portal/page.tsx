@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
+import { isWebsiteLeadSupportItem } from "@/lib/contact-leads";
 import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 import { DismissibleNotice } from "@/components/dismissible-notice";
 import { buildClientPaymentUrl } from "@/lib/client-payment";
@@ -67,9 +68,15 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
 
   const requestQueueItems = isAdmin
     ? workItems.filter((item) => {
+        if (isWebsiteLeadSupportItem(item)) {
+          return false;
+        }
         const purposeDef = getRequestPurposeDefinition(item.purposeId, item.purpose);
         return !item.projectId || purposeDef.queueCategory === "REQUEST";
       })
+    : [];
+  const websiteLeadItems = isAdmin
+    ? workItems.filter((item) => isWebsiteLeadSupportItem(item))
     : [];
   const changeQueueItems = isAdmin
     ? workItems.filter(
@@ -112,6 +119,11 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           label: "Request queue",
           value: requestQueueItems.length.toString().padStart(2, "0"),
           href: "/portal/admin/requests",
+        },
+        {
+          label: "Website leads",
+          value: websiteLeadItems.length.toString().padStart(2, "0"),
+          href: "/portal/admin/leads",
         },
         {
           label: "Change queue",
@@ -248,7 +260,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </article>
 
       {/* Stat cards */}
-      <section className={`grid gap-5 md:grid-cols-2 ${isAdmin ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>
+      <section className={`grid gap-5 md:grid-cols-2 ${isAdmin ? "xl:grid-cols-6" : "xl:grid-cols-4"}`}>
         {stats.map((item) => {
           const inner = (
             <>

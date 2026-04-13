@@ -89,6 +89,16 @@ export function PortalMoreMenu({ role }: PortalMoreMenuProps) {
             </Link>
           ) : null}
 
+          {role === "ADMIN" ? (
+            <Link
+              href="/portal/admin/leads"
+              onClick={() => setOpen(false)}
+              style={{ padding: "8px 10px", borderRadius: "8px", color: "var(--muted)", textDecoration: "none" }}
+            >
+              Leads
+            </Link>
+          ) : null}
+
           <Link
             href="/portal/profile"
             onClick={() => setOpen(false)}

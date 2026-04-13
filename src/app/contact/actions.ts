@@ -3,6 +3,10 @@
 import nodemailer from "nodemailer";
 import { z } from "zod";
 
+import { WEBSITE_LEAD_MARKER } from "@/lib/contact-leads";
+import { prisma } from "@/lib/prisma";
+import { getRequestPurposeDefinition } from "@/lib/portal-constants";
+
 const schema = z.object({
   name:    z.string().min(1, "Name is required").max(100),
   email:   z.string().email("Enter a valid email address"),
@@ -10,6 +14,8 @@ const schema = z.object({
   service: z.string().max(80).optional(),
   message: z.string().min(10, "Please include a brief message").max(5000),
 });
+
+const CONTACT_PURPOSE = getRequestPurposeDefinition("GENERAL_QUESTION", null);
 
 export type ContactState = {
   success: boolean;
@@ -40,6 +46,39 @@ export async function submitContact(
 
   const { name, email, phone, service, message } = parsed.data;
 
+  const detail = [
+    WEBSITE_LEAD_MARKER,
+    "",
+    `Name: ${name}`,
+    `Email: ${email}`,
+    phone ? `Phone: ${phone}` : "Phone: (not provided)",
+    service ? `Service: ${service}` : "Service: (not selected)",
+    "",
+    "Message:",
+    message,
+  ].join("\n");
+
+  try {
+    await prisma.supportItem.create({
+      data: {
+        title: service ? `${service} inquiry from ${name}` : `Website inquiry from ${name}`,
+        detail,
+        category: service?.trim() || "General",
+        purpose: CONTACT_PURPOSE.label,
+        purposeId: CONTACT_PURPOSE.id,
+        queueCategory: CONTACT_PURPOSE.queueCategory,
+        status: "Open",
+        subStatus: "",
+      },
+    });
+  } catch (error) {
+    console.error("submitContact supportItem create failed:", error);
+    return {
+      success: false,
+      error: "Failed to submit message. Please try again.",
+    };
+  }
+
   // Only attempt email if SMTP env vars are configured
   const smtpHost = process.env.SMTP_HOST;
   if (smtpHost) {
@@ -68,8 +107,8 @@ export async function submitContact(
           message,
         ].filter(Boolean).join("\n"),
       });
-    } catch {
-      return { success: false, error: "Failed to send message. Please try again or email chris@eckman.solutions directly." };
+    } catch (error) {
+      console.error("submitContact email failed:", error);
     }
   }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { isWebsiteLeadSupportItem } from "@/lib/contact-leads";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { getRequestPurposeDefinition } from "@/lib/portal-constants";
@@ -18,6 +19,7 @@ export default async function AdminPage() {
     prisma.invoice.count(),
     prisma.supportItem.findMany({
       select: {
+        detail: true,
         projectId: true,
         purposeId: true,
         purpose: true,
@@ -32,12 +34,14 @@ export default async function AdminPage() {
     const fallback = getRequestPurposeDefinition(item.purposeId, item.purpose).queueCategory;
     const queueCategory = (item.queueCategory ?? fallback).trim().toUpperCase();
     return {
+      isWebsiteLead: isWebsiteLeadSupportItem(item),
       projectId: item.projectId,
       queueCategory,
     };
   });
 
-  const requestCount = classified.filter((item) => !item.projectId || item.queueCategory === "REQUEST").length;
+  const websiteLeadCount = classified.filter((item) => item.isWebsiteLead).length;
+  const requestCount = classified.filter((item) => !item.isWebsiteLead && (!item.projectId || item.queueCategory === "REQUEST")).length;
   const changeCount = classified.filter((item) => Boolean(item.projectId) && item.queueCategory === "CHANGE").length;
   const supportCount = classified.filter((item) => Boolean(item.projectId) && item.queueCategory === "SUPPORT").length;
 
@@ -47,6 +51,7 @@ export default async function AdminPage() {
     { label: "Quotes", href: "/portal/admin/quotes", count: quoteCount, description: "Create estimates with line items and convert approved quotes into projects/invoices." },
     { label: "Invoices", href: "/portal/admin/invoices", count: invoiceCount, description: "Create and update invoice records for the billing section." },
     { label: "Request queue", href: "/portal/admin/requests", count: requestCount, description: "Review incoming requests that are not linked to a project yet." },
+    { label: "Website leads", href: "/portal/admin/leads", count: websiteLeadCount, description: "Review website contact form submissions and triage them into work." },
     { label: "Change queue", href: "/portal/admin/changes", count: changeCount, description: "Review project-linked change requests for existing project additions." },
     { label: "Support queue", href: "/portal/admin/support", count: supportCount, description: "Manage project-linked support requests shown in the support queue." },
     { label: "Invites", href: "/portal/admin/invites", count: unusedInviteCount, description: "Generate single-use signup links to onboard new clients." },

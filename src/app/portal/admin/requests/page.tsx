@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { convertRequestToProjectAction, deleteSupportItemAction } from "@/app/portal/admin/actions";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { isWebsiteLeadSupportItem } from "@/lib/contact-leads";
 import { getRequestPurposeDefinition } from "@/lib/portal-constants";
 
 export const metadata: Metadata = { title: "Request Queue — Admin" };
@@ -13,7 +14,7 @@ const NEW_PROJECT_PURPOSE_LABELS = ["New Project", "New project", "new project"]
 
 export default async function AdminRequestsPage() {
   await requireAdmin();
-  const items = await prisma.supportItem.findMany({
+  const rawItems = await prisma.supportItem.findMany({
     where: {
       OR: [
         { projectId: null },
@@ -25,6 +26,7 @@ export default async function AdminRequestsPage() {
     orderBy: { createdAt: "desc" },
     include: { project: { select: { name: true } } },
   });
+  const items = rawItems.filter((item) => !isWebsiteLeadSupportItem(item));
 
   return (
     <section style={{ padding: "0" }}>
@@ -43,6 +45,12 @@ export default async function AdminRequestsPage() {
           style={{ borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", textDecoration: "none", display: "inline-block" }}
         >
           + New request
+        </Link>
+        <Link
+          href="/portal/admin/leads"
+          style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "10px 24px", fontSize: ".875rem", color: "var(--muted)", textDecoration: "none", display: "inline-block" }}
+        >
+          Website leads
         </Link>
       </div>
 

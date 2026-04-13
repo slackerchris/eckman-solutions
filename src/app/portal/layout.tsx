@@ -48,7 +48,7 @@ export default async function PortalLayout({
                 </Link>
               ) : null}
               {session ? (
-                <Link href="/portal/invoices" style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
+                <Link href={session.role === "ADMIN" ? "/portal/admin/invoices" : "/portal/invoices"} style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 12px", color: "var(--muted)", textDecoration: "none" }}>
                   Invoices
                 </Link>
               ) : null}
