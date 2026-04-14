@@ -26,6 +26,8 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_TLS_REJECT_UNAUTHORIZED: ${SMTP_TLS_REJECT_UNAUTHORIZED:-true}
       CONTACT_TO: ${CONTACT_TO:-chris@eckman.solutions}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     ports:
       - "3001:3000"
     extra_hosts:

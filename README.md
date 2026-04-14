@@ -46,6 +46,13 @@ SMTP_TLS_REJECT_UNAUTHORIZED="true"
 CONTACT_TO="chris@eckman.solutions"
 ```
 
+Stripe webhook values (optional, for auto-marking invoices as paid):
+
+```bash
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+```
+
 Generate a session secret with:
 
 ```bash
@@ -82,6 +89,36 @@ SMTP_HOST="host.docker.internal"
 ```
 
 The Compose file includes a host gateway mapping so Linux containers can reach host services such as Proton Bridge.
+
+### Stripe invoice payment status sync
+
+If you use Stripe for checkout, you can auto-update invoice status to `Paid` via webhook:
+
+1. Configure env vars:
+
+```bash
+STRIPE_SECRET_KEY="sk_live_or_test_key"
+STRIPE_WEBHOOK_SECRET="whsec_..."
+```
+
+2. In Stripe, create a webhook endpoint:
+
+```bash
+https://your-domain/api/stripe/webhook
+```
+
+3. Include your internal invoice ID in one of these Stripe fields:
+- `client_reference_id` (recommended for Checkout Sessions)
+- `metadata.invoiceId`
+- `metadata.invoice_id`
+- `metadata.invoice`
+
+Supported success events:
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `payment_intent.succeeded`
+- `charge.succeeded`
+- `invoice.payment_succeeded`
 
 ## Local development
 
