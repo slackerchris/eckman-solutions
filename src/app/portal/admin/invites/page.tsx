@@ -5,6 +5,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { InviteGenerator } from "@/components/invite-generator";
+import { InviteLinkActions } from "@/components/invite-link-actions";
 
 export const metadata: Metadata = { title: "Invites — Admin" };
 
@@ -39,32 +40,42 @@ export default async function AdminInvitesPage() {
             Recent invites
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {invites.map((inv) => (
+            {invites.map((inv) => {
+              const link = `${baseUrl}/portal/invite/${inv.token}`;
+              const isUsed = Boolean(inv.usedAt);
+
+              return (
               <div
                 key={inv.id}
                 style={{ border: "1px solid var(--border)", borderRadius: "1rem", background: "var(--card)", padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}
               >
-                <code style={{ fontSize: ".75rem", color: "var(--muted)", wordBreak: "break-all" }}>
-                  {inv.token.slice(0, 16)}…
-                </code>
-                <span
-                  style={{
-                    fontFamily: "monospace",
-                    fontSize: ".7rem",
-                    textTransform: "uppercase",
-                    letterSpacing: ".1em",
-                    padding: "3px 10px",
-                    borderRadius: "999px",
-                    border: "1px solid var(--border)",
-                    color: inv.usedAt ? "var(--muted)" : "var(--accent)",
-                  }}
-                >
-                  {inv.usedAt
-                    ? `Used ${new Date(inv.usedAt).toLocaleDateString()}`
-                    : `Created ${new Date(inv.createdAt).toLocaleDateString()}`}
-                </span>
+                <div style={{ minWidth: "260px", flex: 1 }}>
+                  <code style={{ fontSize: ".75rem", color: "var(--muted)", wordBreak: "break-all" }}>
+                    {link}
+                  </code>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <InviteLinkActions link={link} disabled={isUsed} />
+                  <span
+                    style={{
+                      fontFamily: "monospace",
+                      fontSize: ".7rem",
+                      textTransform: "uppercase",
+                      letterSpacing: ".1em",
+                      padding: "3px 10px",
+                      borderRadius: "999px",
+                      border: "1px solid var(--border)",
+                      color: isUsed ? "var(--muted)" : "var(--accent)",
+                    }}
+                  >
+                    {isUsed
+                      ? `Used ${new Date(inv.usedAt!).toLocaleDateString()}`
+                      : `Created ${new Date(inv.createdAt).toLocaleDateString()}`}
+                  </span>
+                </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

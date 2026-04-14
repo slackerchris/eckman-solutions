@@ -95,6 +95,60 @@ export async function adminToggleDisabledAction(userId: string, disable: boolean
   redirect(`/portal/admin/users/${userId}`);
 }
 
+// ─── Change user role ────────────────────────────────────────────────────────
+
+export async function adminSetUserRoleAction(
+  userId: string,
+  _prev: AdminUserActionState,
+  formData: FormData,
+): Promise<AdminUserActionState> {
+  const session = await requireAdmin();
+
+  const nextRoleRaw = String(formData.get("role") ?? "").trim();
+  if (nextRoleRaw !== "ADMIN" && nextRoleRaw !== "CLIENT") {
+    return { error: "Please choose a valid user type." };
+  }
+
+  const nextRole = nextRoleRaw as "ADMIN" | "CLIENT";
+
+  try {
+    const target = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true, name: true },
+    });
+
+    if (!target) {
+      return { error: "User not found." };
+    }
+
+    if (target.role === nextRole) {
+      return { success: `${target.name}'s user type is already ${nextRole}.` };
+    }
+
+    // Prevent self-demotion and preserve at least one admin account.
+    if (target.id === session.userId && nextRole !== "ADMIN") {
+      return { error: "You cannot change your own account to client." };
+    }
+
+    if (target.role === "ADMIN" && nextRole === "CLIENT") {
+      const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+      if (adminCount <= 1) {
+        return { error: "At least one admin account is required." };
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: nextRole },
+    });
+  } catch (e) {
+    console.error("adminSetUserRoleAction failed:", e);
+    return { error: "Failed to update user type. Please try again." };
+  }
+
+  return { success: "User type updated successfully." };
+}
+
 // ─── Delete user ──────────────────────────────────────────────────────────────
 
 export async function adminDeleteUserAction(userId: string) {

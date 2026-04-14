@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import { createInviteAction, type InviteActionState } from "@/app/portal/invite/actions";
 import { inputStyle as baseInputStyle } from "@/components/form-styles";
+import { InviteLinkActions } from "@/components/invite-link-actions";
 
 const inviteLinkInputStyle = {
   ...baseInputStyle,
@@ -41,13 +42,7 @@ export function InviteGenerator({ baseUrl }: { baseUrl: string }) {
           </p>
           <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
             <input readOnly value={link} style={inviteLinkInputStyle} onFocus={(e) => e.target.select()} />
-            <button
-              type="button"
-              style={{ border: "1px solid var(--border)", borderRadius: "999px", padding: "10px 20px", fontSize: ".8rem", color: "var(--ink)", background: "transparent", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}
-              onClick={() => navigator.clipboard.writeText(link)}
-            >
-              Copy
-            </button>
+            <InviteLinkActions link={link} />
           </div>
         </div>
       )}

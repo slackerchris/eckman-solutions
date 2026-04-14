@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { requireAdmin, requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { SetPasswordForm } from "@/components/admin-user-forms";
+import { SetPasswordForm, SetUserRoleForm } from "@/components/admin-user-forms";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import {
   adminGenerateResetLinkAndRedirectAction,
@@ -154,6 +154,27 @@ export default async function AdminUserDetailPage({
         </div>
         <div style={sectionBodyStyle}>
           <SetPasswordForm userId={id} />
+        </div>
+      </article>
+
+      {/* Change user type */}
+      <article style={sectionStyle}>
+        <div style={sectionHeaderStyle}>
+          <p style={{ fontFamily: "monospace", fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".18em", color: "var(--accent)", margin: 0 }}>
+            User type
+          </p>
+          <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: "4px", marginBottom: 0 }}>
+            Set this account as a client or admin.
+          </p>
+        </div>
+        <div style={sectionBodyStyle}>
+          {isSelf ? (
+            <p style={{ fontSize: ".875rem", color: "var(--muted)", margin: 0 }}>
+              You cannot change your own account type.
+            </p>
+          ) : (
+            <SetUserRoleForm userId={id} currentRole={user.role} />
+          )}
         </div>
       </article>
 
