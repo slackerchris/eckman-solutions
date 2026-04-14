@@ -260,6 +260,10 @@ export async function emailQuoteShareLinkAction(id: string) {
 
     const tokenData = await ensureQuotePublicToken(id);
     const shareUrl = buildPublicQuoteUrl(tokenData.token);
+    const smtpFrom =
+      process.env.SMTP_FROM?.trim() ||
+      process.env.SMTP_USER?.trim() ||
+      "no-reply@eckman.local";
 
     const transporter = nodemailer.createTransport({
       host: smtpHost,
@@ -269,10 +273,13 @@ export async function emailQuoteShareLinkAction(id: string) {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+      },
     });
 
     await transporter.sendMail({
-      from: `"Eckman Solutions" <${process.env.SMTP_USER}>`,
+      from: `"Eckman Solutions" <${smtpFrom}>`,
       to: quote.user.email,
       subject: `Your quote: ${quote.label}`,
       text: [

@@ -83,6 +83,11 @@ export async function submitContact(
   const smtpHost = process.env.SMTP_HOST;
   if (smtpHost) {
     try {
+      const smtpFrom =
+        process.env.SMTP_FROM?.trim() ||
+        process.env.SMTP_USER?.trim() ||
+        "no-reply@eckman.local";
+
       const transporter = nodemailer.createTransport({
         host:   smtpHost,
         port:   Number(process.env.SMTP_PORT ?? 587),
@@ -91,10 +96,13 @@ export async function submitContact(
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
+        tls: {
+          rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+        },
       });
 
       await transporter.sendMail({
-        from:    `"Eckman Solutions Site" <${process.env.SMTP_USER}>`,
+        from:    `"Eckman Solutions Site" <${smtpFrom}>`,
         to:      process.env.CONTACT_TO ?? "chris@eckman.solutions",
         replyTo: email,
         subject: `New contact from ${name}`,

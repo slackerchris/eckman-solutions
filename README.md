@@ -33,11 +33,55 @@ DATABASE_URL="file:../data/portal.db"
 SESSION_SECRET="generate-with-openssl-rand-base64-32"
 ```
 
+SMTP values (optional, for contact + quote emails):
+
+```bash
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_SECURE="false"
+SMTP_USER=""
+SMTP_PASS=""
+SMTP_FROM=""
+SMTP_TLS_REJECT_UNAUTHORIZED="true"
+CONTACT_TO="chris@eckman.solutions"
+```
+
 Generate a session secret with:
 
 ```bash
 openssl rand -base64 32
 ```
+
+### Proton Mail Bridge (Proton Unlimited)
+
+If you are using Proton Mail Unlimited, the app can send email through Proton Mail Bridge.
+
+Bridge setup values:
+
+```bash
+SMTP_PORT="1025"
+SMTP_SECURE="false"
+SMTP_TLS_REJECT_UNAUTHORIZED="false"
+SMTP_USER="<bridge username>"
+SMTP_PASS="<bridge password>"
+SMTP_FROM="yourname@proton.me"
+```
+
+Host value depends on where the app runs:
+
+- Local app process (for example `npm run dev`):
+
+```bash
+SMTP_HOST="127.0.0.1"
+```
+
+- Docker app container:
+
+```bash
+SMTP_HOST="host.docker.internal"
+```
+
+The Compose file includes a host gateway mapping so Linux containers can reach host services such as Proton Bridge.
 
 ## Local development
 

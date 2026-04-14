@@ -14,6 +14,8 @@ services:
       PORTAL_ADMIN_NAME: ${PORTAL_ADMIN_NAME:-Portal Admin}
     ports:
       - "3001:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - eckman-data:/app/data
 
