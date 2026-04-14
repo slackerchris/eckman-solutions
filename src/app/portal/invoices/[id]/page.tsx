@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/session";
 import { buildClientPaymentUrl } from "@/lib/client-payment";
 import {
+  isInvoiceDiscountLine,
   getInvoiceDiscountCentsFromLineItems,
   getInvoiceLineItemDisplayDescription,
 } from "@/lib/invoice-utils";
@@ -54,10 +55,13 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
     notFound();
   }
 
-  const lineSubtotal = invoice.lineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
+  const visibleLineItems = invoice.lineItems.filter((item) => !isInvoiceDiscountLine(item));
+  const lineSubtotal = visibleLineItems.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
   const invoiceDiscountCents = getInvoiceDiscountCentsFromLineItems(invoice.lineItems);
   const invoiceTotalCents = parseCurrencyToCents(invoice.amount);
   const invoiceSubtotalBeforeDiscountCents = invoiceTotalCents + invoiceDiscountCents;
+  const combinedQuoteAndInvoiceDiscountCents =
+    (invoice.quote?.discountCents ?? 0) + invoiceDiscountCents;
   const statusLower = invoice.status.toLowerCase();
   const payUrl = buildClientPaymentUrl(paymentBaseUrl, {
     invoiceId: invoice.id,
@@ -117,11 +121,11 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
       ) : null}
 
       <article style={{ border: "1px solid var(--border)", borderRadius: "1.25rem", background: "var(--card)", padding: "20px 22px" }}>
-        {invoice.lineItems.length === 0 ? (
+        {visibleLineItems.length === 0 ? (
           <p style={{ color: "var(--muted)", fontSize: ".9rem" }}>No line items on this invoice.</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {invoice.lineItems.map((item) => (
+            {visibleLineItems.map((item) => (
               <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "center", borderBottom: "1px dashed var(--border)", paddingBottom: "10px" }}>
                 <div>
                   <p style={{ fontSize: ".95rem", color: "var(--ink)" }}>{getInvoiceLineItemDisplayDescription(item.description)}</p>
@@ -143,17 +147,19 @@ export default async function ClientInvoiceDetailPage({ params }: { params: Prom
 
           {invoice.quote ? (
             <>
-              <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: ".86rem" }}>
-                <span>Discount</span>
-                <span>-{formatCents(invoice.quote.discountCents)}</span>
-              </div>
+              {combinedQuoteAndInvoiceDiscountCents > 0 ? (
+                <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: ".86rem" }}>
+                  <span>Discount</span>
+                  <span>-{formatCents(combinedQuoteAndInvoiceDiscountCents)}</span>
+                </div>
+              ) : null}
               <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: ".86rem" }}>
                 <span>Tax</span>
                 <span>{formatCents(invoice.quote.taxCents)}</span>
               </div>
               <div style={{ borderTop: "1px solid var(--border)", marginTop: "2px", paddingTop: "10px", display: "flex", justifyContent: "space-between", fontWeight: 700, color: "var(--ink)" }}>
                 <span>Total</span>
-                <span>{formatCents(invoice.quote.totalCents)}</span>
+                <span>{formatCents(invoiceTotalCents)}</span>
               </div>
             </>
           ) : (

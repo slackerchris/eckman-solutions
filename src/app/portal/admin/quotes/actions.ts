@@ -224,6 +224,8 @@ export async function deleteQuoteAction(id: string) {
 export async function createQuoteShareLinkAction(id: string) {
   await requireAdmin();
 
+  let destination = "/portal/admin/quotes";
+
   try {
     const quote = await ensureQuotePublicToken(id);
 
@@ -240,15 +242,19 @@ export async function createQuoteShareLinkAction(id: string) {
     }
 
     const shareUrl = buildPublicQuoteUrl(quote.token);
-    redirect(`/portal/admin/quotes?message=${encodeURIComponent(`Share link ready: ${shareUrl}`)}`);
+    destination = `/portal/admin/quotes?message=${encodeURIComponent(`Share link ready: ${shareUrl}`)}`;
   } catch (error) {
     const message = getActionErrorMessage(error, "Failed to create share link.");
-    redirect(`/portal/admin/quotes?error=${encodeURIComponent(message)}`);
+    destination = `/portal/admin/quotes?error=${encodeURIComponent(message)}`;
   }
+
+  redirect(destination);
 }
 
 export async function emailQuoteShareLinkAction(id: string) {
   await requireAdmin();
+
+  let destination = "/portal/admin/quotes";
 
   try {
     const quote = await prisma.quote.findUnique({
@@ -315,11 +321,13 @@ export async function emailQuoteShareLinkAction(id: string) {
       },
     });
 
-    redirect(`/portal/admin/quotes?message=${encodeURIComponent(`Quote link emailed to ${quote.user.email}`)}`);
+    destination = `/portal/admin/quotes?message=${encodeURIComponent(`Quote link emailed to ${quote.user.email}`)}`;
   } catch (error) {
     const message = getActionErrorMessage(error, "Failed to email quote link.");
-    redirect(`/portal/admin/quotes?error=${encodeURIComponent(message)}`);
+    destination = `/portal/admin/quotes?error=${encodeURIComponent(message)}`;
   }
+
+  redirect(destination);
 }
 
 export async function convertQuoteToInvoiceAction(id: string) {
