@@ -16,6 +16,7 @@ export default async function ClientQuotesPage() {
 
   const quotes = await prisma.quote.findMany({
     where: {
+      status: { not: "Draft" },
       OR: [
         { userId: session.userId },
         { project: { userId: session.userId } },

@@ -14,7 +14,7 @@ function getActionErrorMessage(error: unknown, fallback: string): string {
 }
 
 function canClientRespondQuoteStatus(status: string): boolean {
-  return !["Accepted", "Converted", "Rejected", "Expired"].includes(status);
+  return status === "Sent";
 }
 
 export async function acceptQuoteAction(id: string) {

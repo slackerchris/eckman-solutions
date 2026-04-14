@@ -12,6 +12,10 @@ import { inputStyle, selectStyle, labelStyle } from "@/components/form-styles";
 
 export const metadata: Metadata = { title: "Edit Quote — Admin" };
 
+const EDITABLE_QUOTE_STATUSES = QUOTE_STATUSES.filter(
+  (status) => status !== "Accepted" && status !== "Converted",
+);
+
 export default async function EditQuotePage({
   params,
   searchParams,
@@ -40,6 +44,11 @@ export default async function EditQuotePage({
   const action = updateQuoteAction.bind(null, quote.id);
   const taxableBaseCents = Math.max(0, quote.subtotalCents - quote.discountCents);
   const taxPercent = taxableBaseCents > 0 ? (quote.taxCents / taxableBaseCents) * 100 : 0;
+  const isEditableStatus =
+    quote.status === "Draft" ||
+    quote.status === "Sent" ||
+    quote.status === "Rejected" ||
+    quote.status === "Expired";
 
   return (
     <section style={{ maxWidth: "760px" }}>
@@ -81,10 +90,10 @@ export default async function EditQuotePage({
           <div>
             <label htmlFor="status" style={labelStyle}>Status</label>
             <select id="status" name="status" required defaultValue={quote.status} style={selectStyle}>
-              {!QUOTE_STATUSES.includes(quote.status as (typeof QUOTE_STATUSES)[number]) && (
+              {!isEditableStatus && (
                 <option value={quote.status}>{quote.status}</option>
               )}
-              {QUOTE_STATUSES.map((status) => (
+              {EDITABLE_QUOTE_STATUSES.map((status) => (
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>

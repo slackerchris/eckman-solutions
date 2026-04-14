@@ -226,6 +226,19 @@ export async function createQuoteShareLinkAction(id: string) {
 
   try {
     const quote = await ensureQuotePublicToken(id);
+
+    const currentQuote = await prisma.quote.findUnique({
+      where: { id: quote.id },
+      select: { status: true },
+    });
+
+    if (currentQuote?.status === "Draft") {
+      await prisma.quote.update({
+        where: { id: quote.id },
+        data: { status: "Sent" },
+      });
+    }
+
     const shareUrl = buildPublicQuoteUrl(quote.token);
     redirect(`/portal/admin/quotes?message=${encodeURIComponent(`Share link ready: ${shareUrl}`)}`);
   } catch (error) {

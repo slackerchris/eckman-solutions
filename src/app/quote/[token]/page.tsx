@@ -29,6 +29,10 @@ export default async function PublicQuotePage({ params }: { params: Promise<{ to
     notFound();
   }
 
+  if (quote.status === "Draft") {
+    notFound();
+  }
+
   const isExpired = Boolean(quote.validUntil && quote.validUntil < new Date());
 
   return (

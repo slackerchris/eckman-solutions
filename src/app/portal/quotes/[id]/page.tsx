@@ -42,7 +42,11 @@ export default async function ClientQuoteDetailPage({
     notFound();
   }
 
-  const canRespond = !["Accepted", "Converted", "Rejected", "Expired"].includes(quote.status);
+  if (quote.status === "Draft") {
+    notFound();
+  }
+
+  const canRespond = quote.status === "Sent";
 
   return (
     <section style={{ maxWidth: "860px" }}>

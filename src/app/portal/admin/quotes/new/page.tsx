@@ -10,6 +10,10 @@ import { inputStyle, selectStyle, labelStyle } from "@/components/form-styles";
 
 export const metadata: Metadata = { title: "New Quote — Admin" };
 
+const EDITABLE_QUOTE_STATUSES = QUOTE_STATUSES.filter(
+  (status) => status !== "Accepted" && status !== "Converted",
+);
+
 export default async function NewQuotePage({
   searchParams,
 }: {
@@ -64,7 +68,7 @@ export default async function NewQuotePage({
           <div>
             <label htmlFor="status" style={labelStyle}>Status</label>
             <select id="status" name="status" required defaultValue="Draft" style={selectStyle}>
-              {QUOTE_STATUSES.map((status) => (
+              {EDITABLE_QUOTE_STATUSES.map((status) => (
                 <option key={status} value={status}>{status}</option>
               ))}
             </select>
